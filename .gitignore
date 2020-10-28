@@ -1,2 +1,5 @@
 # Compiled python modules.
 **.pyc
+
+# Results folder
+examples/results/

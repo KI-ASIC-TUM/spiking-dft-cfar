@@ -75,15 +75,15 @@ class LinearFrequencyEncoder(Encoder):
         return (period, init_spike)
 
     def run(self, value):
+        # If input is vector, transform it into 1xN array
+        if len(value.shape)==1:
+            value = value.reshape(1, -1)
         rows = value.shape[0]
-        try:
-            cols = value.shape[1]
-        except IndexError:
-            cols = 1
+        cols = value.shape[1]
         periods, init_spikes = self.get_spike_params(value)
         timesteps = int(self.time_range / self.time_step)
         self.spike_trains = np.zeros((rows, cols, timesteps))
-        for row, col in np.ndindex(value.shape):
+        for row, col in np.ndindex((rows, cols)):
             period = periods[row, col]
             init_spike = init_spikes[row, col]
             self.spike_trains[row, col, init_spike::period] = 1

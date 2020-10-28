@@ -189,6 +189,18 @@ class FourierTransformSpikingNetwork():
             return self.spike_trains_l1
         return self.spike_trains_l2
 
+
+def adjust_1dfft_data(input_data):
+    """
+    Adjust data after spiking 2D DFT, so it can be easily plotted
+    """
+    spike_sum = input_data.sum(axis=0)
+    real = spike_sum[:900, 0] - spike_sum[:900, 1]
+    imag = spike_sum[900:, 0] - spike_sum[900:, 1]
+    modulus = np.sqrt(real**2+imag**2) + 0.1
+    result = modulus[1:450]
+    return result
+
 def adjust_2dfft_data(input_data):
     """
     Adjust data after spiking 2D DFT, so it can be easily plotted

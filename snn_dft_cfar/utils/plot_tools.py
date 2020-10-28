@@ -38,6 +38,24 @@ def format_plotting():
     plt.gca().yaxis.set_ticks_position('left')
     return
 
+def plot_1dfft(dft_data):
+    # Radar parameters
+    c = 3 * 10**2   # [m/us]
+    f_max = 24 / 2  # [GHz]
+    S = 6.55        # [GHz/us]
+    # Calculate maximum range
+    d_max = (f_max*c) / (2*S)
+    
+    freq_bins = np.arange(0, d_max, d_max/dft_data.size)
+    # Plot results
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(freq_bins, dft_data)
+    ax.set_xlabel("Range (m)")
+    ax.set_title("Spiking Neural Network DFT")
+    plt.show()
+    return fig
+
 def plot_2dfft(dft_data):
     # Radar parameters
     f_s = 77        # [GHz]

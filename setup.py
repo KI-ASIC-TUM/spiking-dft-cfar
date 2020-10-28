@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="spiking-dft-cfar",
+    name="snn_dft_cfar",
     version="0.1",
     description="Package for performing 2D-DFT and OS-CFAR on radar signals",
     url="https://gitlab.lrz.de/ki-asic/spiking-dft-cfar",

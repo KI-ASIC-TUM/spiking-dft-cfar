@@ -88,3 +88,63 @@ class LinearFrequencyEncoder(Encoder):
             init_spike = init_spikes[row, col]
             self.spike_trains[row, col, init_spike::period] = 1
         return self.spike_trains
+
+
+class TimeEncoder(Encoder):
+    """
+    Time encoder. Encodes np.array or single values into the time domain. 
+    Higher numbers spike at earlier times. Formula of encoding:
+
+    LaTeX:
+    t_i = (t_{max}-t_{min}) cdot 
+          (1- frac{x_i - x_{min}}{x_{max}-x_{min}} ) + t_{min}
+
+    """
+
+    def __init__(self, t_max, t_min, x_max, x_min):
+        """
+        Initialization.
+
+        @param t_max : latest possible spike time
+        @param t_min : earliest possible spike time
+        @param x_max : upper bound for encoded values
+        @param x_max : lower bound for encoded values
+        """
+
+        super().__init__()
+        # Store encoder parameteres
+        self.t_max = t_max
+        self.t_min = t_min
+        self.x_max = x_max
+        self.x_min = x_min
+
+    def get_parameters(self):
+        """
+        Returns the used parameters: t_max, t_min, x_max, x_min.
+        """
+        return self.t_max, self.t_min, self.x_max, self.x_min
+
+    def set_parameters(self, t_max, t_min, x_max, x_min):
+        '''
+        Set the parameters of TimeEncoder.
+
+        @param t_max : latest possible spike time
+        @param t_min : earliest possible spike time
+        @param x_max : upper bound for encoded values
+        @param x_max : lower bound for encoded values        
+        '''
+        self.t_max = t_max
+        self.t_min = t_min
+        self.x_max = x_max
+        self.x_min = x_min
+
+    def run(self, values):
+        """
+        Returns the time encoding of the value(s). Encoding formula in LaTeX:
+        t_i = (t_{max}-t_{min}) cdot 
+              (1- frac{x_i - x_{min}}{x_{max}-x_{min}} ) + t_{min}
+
+        @param values: np.array / float / double to encode
+        """
+        return (self.t_max-self.t_min) * (1-(values - self.x_min) / 
+               (self.x_max-self.x_min)) + self.t_min

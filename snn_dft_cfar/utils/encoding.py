@@ -125,14 +125,14 @@ class TimeEncoder(Encoder):
         return self.t_max, self.t_min, self.x_max, self.x_min
 
     def set_parameters(self, t_max, t_min, x_max, x_min):
-        '''
+        """
         Set the parameters of TimeEncoder.
 
         @param t_max : latest possible spike time
         @param t_min : earliest possible spike time
         @param x_max : upper bound for encoded values
         @param x_max : lower bound for encoded values        
-        '''
+        """
         self.t_max = t_max
         self.t_min = t_min
         self.x_max = x_max

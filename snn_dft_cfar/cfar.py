@@ -11,8 +11,8 @@ import brian2
 from snn_dft_cfar.utils.encoding import TimeEncoder
 
 
-class TraditionalCFAR(ABC):
-#class TraditionalCFAR():
+
+class TraditionalCFAR():
     """
     Implementation of the traditional CFAR algorithm. 
     """
@@ -28,7 +28,8 @@ class TraditionalCFAR(ABC):
         @param neighbour_cells: number of neighbour cells (as above)
         """
 
-        #super().__init__()
+        self.name = 'generic cfar'
+
         # Store encoder parameteres
         self.scale_factor = scale_factor
         self.guarding_cells = guarding_cells
@@ -48,7 +49,6 @@ class TraditionalCFAR(ABC):
         """
         return self.run(data, *args)
         
-    #@abstractmethod
     def statistical_measure(self,np_array):
         """
         Computes the statistical measure for the CFAR algorithm.
@@ -175,6 +175,7 @@ class TraditionalCFAR(ABC):
             error = """
             2D CFAR plotting is not yet implemented
             """
+            raise ValueError(error)
     
     def plot_1d(self):
         """
@@ -212,6 +213,7 @@ class TraditionalCFAR(ABC):
         plt.legend()
         plt.grid(True)
         plt.ylabel('signal')
+        plt.title(self.name)
         plt.show()
 
 
@@ -230,6 +232,7 @@ class CACFAR(TraditionalCFAR):
         @param neighbour_cells: number of neighbour cells (as above)
         """
         super(CACFAR,self).__init__(scale_factor,guarding_cells,neighbour_cells)
+        self.name = 'CA-CFAR'
 
     def statistical_measure(self,np_array):
         return np.average(np_array)
@@ -253,6 +256,7 @@ class OSCFAR(TraditionalCFAR):
         super(OSCFAR,self).__init__(scale_factor,guarding_cells,neighbour_cells)
         # OSCFAR needs an integer k for determining the k-th largest value
         self.k = k
+        self.name = 'OS-CFAR'
 
     def statistical_measure(self,np_array):
         return np.partition(np_array,-self.k)[-self.k]
@@ -280,6 +284,8 @@ class OSCFAR_SNN(TraditionalCFAR):
         """
         super(OSCFAR_SNN,self).__init__(scale_factor,guarding_cells,
                                         neighbour_cells)
+        self.name = 'OS-CFAR SNN'
+
         # OSCFAR needs an integer k for determining the k-th largest value
         self.k = k
 

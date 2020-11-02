@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 """
 Library containing CFAR implementations
-"""# Standard/3rd party libraries
+"""
+# Standard/3rd party libraries
 from abc import ABC, abstractmethod
 import numpy as np
 import matplotlib.pyplot as plt
+import brian2
 # Local libraries
+from snn_dft_cfar.utils.encoding import TimeEncoder
 
 
 class TraditionalCFAR(ABC):
+#class TraditionalCFAR():
     """
     Implementation of the traditional CFAR algorithm. 
     """
@@ -24,7 +28,7 @@ class TraditionalCFAR(ABC):
         @param neighbour_cells: number of neighbour cells (as above)
         """
 
-        super().__init__()
+        #super().__init__()
         # Store encoder parameteres
         self.scale_factor = scale_factor
         self.guarding_cells = guarding_cells
@@ -35,13 +39,16 @@ class TraditionalCFAR(ABC):
         self.results = np.empty(1)
         self.threshold = np.empty(1)
         
+        # show threshold
+        self.show_threshold = True
+
     def __call__(self, data, *args):
         """
         Calling the object executes the function 'run'.
         """
         return self.run(data, *args)
         
-    @abstractmethod
+    #@abstractmethod
     def statistical_measure(self,np_array):
         """
         Computes the statistical measure for the CFAR algorithm.
@@ -100,31 +107,29 @@ class TraditionalCFAR(ABC):
             test_value, neighbour_values = self.roi_1d(
                                             np_array[i:i+window_size])
             # compute statistical measure
-            stat = self.statistical_measure(neighbour_values)
+            #stat = self.statistical_measure(neighbour_values)
             # save threshold
-            self.threshold[i] = stat / self.scale_factor
+            #self.threshold[i] = stat / self.scale_factor
             # save results
-            self.results[i] = self.compare(test_value,stat)
-
-            # DEBUG
-            #print()
-            #print('step')
-            #print(i)
-            #print('result')
-            #print(self.results[i])
-            #print('input')
-            #print(np_array[i:i+window_size])
-            #print('neighbours')
-            #print(neighbour_values)
-            #print('test value')
-            #print(test_value)
-            #print('scaled test value')
-            #print(self.scale_factor*test_value)
-            #print('statistical value')
-            #print(stat)
+            #self.results[i] = self.compare(test_value,stat)
+            self.cfar_1d_core(i,test_value,neighbour_values)
 
         # return results array    
         return self.results
+
+    def cfar_1d_core(self,i,test_value,neighbour_values):
+        """
+        Computes the statistical measure, threshold, and result.
+        @param i: which position of the result is considered
+        @param test_value: test value
+        @param neighbour_values: values of all neighbours
+        """
+        # compute statistical measure
+        stat = self.statistical_measure(neighbour_values)
+        # save threshold
+        self.threshold[i] = stat / self.scale_factor
+        # save results
+        self.results[i] = self.compare(test_value,stat)
       
     def cfar_2d(self,np_array):
         """
@@ -180,10 +185,11 @@ class TraditionalCFAR(ABC):
         plt.plot(self.input_array,label = 'signal')
 
         # plot threshold line
-        low = self.guarding_cells+self.neighbour_cells
-        high = self.guarding_cells+self.neighbour_cells+self.threshold.size
-        plt.plot(range(low,high),self.threshold,ls='dotted',lw=1, c='C3', 
-                 label='threshold')
+        if self.show_threshold:
+            low = self.guarding_cells+self.neighbour_cells
+            high = self.guarding_cells+self.neighbour_cells+self.threshold.size
+            plt.plot(range(low,high),self.threshold,ls='dotted',lw=1, c='C3', 
+                    label='threshold')
 
         # plot detected peaks
         cntr = 0
@@ -251,3 +257,104 @@ class OSCFAR(TraditionalCFAR):
     def statistical_measure(self,np_array):
         return np.partition(np_array,-self.k)[-self.k]
         
+
+class OSCFAR_SNN(TraditionalCFAR):
+    """
+    Ordered Statistics CFAR algorithms.
+    """
+    def __init__(self, scale_factor,guarding_cells,neighbour_cells,
+                 k, t_max, t_min, x_max, x_min):
+        """
+        Initialization.
+
+        @param scale_factor: how to scale test_cell before compring with 
+                             statistical measure
+        @param guarding_cells: number of guarding cells (counted from left to 
+                               center)
+        @param neighbour_cells: number of neighbour cells (as above)
+        @param k: k-th largest value to find for statistical measure (int)
+        @param t_max: largest spike time for simulation
+        @param t_min: smallest spike time for simulation
+        @param x_max: upper bound for signal values
+        @param x_min: lower bound for signal values
+        """
+        super(OSCFAR_SNN,self).__init__(scale_factor,guarding_cells,
+                                        neighbour_cells)
+        # OSCFAR needs an integer k for determining the k-th largest value
+        self.k = k
+
+        # SNN does not compute a threshold
+        self.show_threshold = False
+
+        # SNN uses time encoding
+        self.t_max = t_max
+        self.t_min = t_min
+        self.x_max = x_max
+        self.x_min = x_min
+
+    def cfar_1d_core(self,i,test_value,neighbour_values):
+        """
+        We replace the cfar_1d_core of the parent class by a functionally 
+        equivalent SNN. See notebook for details.
+
+        @param i: which position of the result is considered
+        @param test_value: test value
+        @param neighbour_values: values of all neighbours
+        """
+
+        # initialize time encoder
+        time_encoder = TimeEncoder(t_max=self.t_max,t_min=self.t_min,
+                                   x_max=self.x_max,x_min=self.x_min)
+
+        # input spike times
+        spike_times = np.zeros(neighbour_values.size+1)
+        spike_times[:neighbour_values.size] = neighbour_values[:]
+        spike_times[-1] = test_value*self.scale_factor
+        spike_times=time_encoder(spike_times)
+        spike_times = [x*brian2.ms for x in spike_times]
+
+        # define weights
+        weights = np.ones(neighbour_values.size+1)
+        weights *= -1
+        weights[-1] = self.k
+
+        # start Brian2 SNN simulation
+        brian2.start_scope()
+        simulation_time = 1.1*self.t_max*brian2.ms
+
+        # define neuron group that spikes at specific input times
+        input_neurons = brian2.NeuronGroup(len(spike_times), 
+                                           'tspike:second',
+                                           threshold='t>tspike', 
+                                           refractory= simulation_time)
+        input_neurons.tspike = spike_times
+
+        # define IF neuron according to previous explanations 
+        tau = 10*brian2.ms
+        eqs = '''
+        dv/dt = 0./tau  : 1
+        '''
+        compute_neuron = brian2.NeuronGroup(1, eqs, threshold='v>=1', 
+                                            refractory= simulation_time, #refractory not working
+                                            reset='v = 0', method ='euler')
+
+        # establish connectivity of the network, weights from above
+        S = brian2.Synapses(input_neurons,compute_neuron,'w:1',
+                            on_pre='v_post += w')
+        S.connect()
+        S.w = weights
+
+        # monitor spiking behaviour 
+        spikemon = brian2.SpikeMonitor(compute_neuron)
+        
+        # run Brian2 simulation
+        brian2.run(simulation_time)
+        
+        # return 1 if spike occurs, 0 if not.
+        self.results[i] = len(spikemon.t)
+
+
+
+
+        
+

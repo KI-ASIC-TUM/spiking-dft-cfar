@@ -208,18 +208,22 @@ def adjust_2dfft_data(input_data):
     # Separate real from imaginary parts,
     # and combine positive and negative quadrants
     spike_sum = input_data.sum(axis=0)
-    real = spike_sum[:, :256]
-    imag = spike_sum[:, 256:]
+    width, height = spike_sum.shape
+    n_samples = int(width/2)
+    n_chirps = int(height/4)
 
-    real_pos = real[:900, :128]
-    real_pos += real[900:, 128:]
-    real_neg = real[900:, :128]
-    real_neg += real[:900, 128:]
+    real = spike_sum[:, :n_chirps*2]
+    imag = spike_sum[:, n_chirps*2:]
+
+    real_pos = real[:n_samples, :n_chirps]
+    real_pos += real[n_samples:, n_chirps:]
+    real_neg = real[n_samples:, :n_chirps]
+    real_neg += real[:n_samples, n_chirps:]
     real_total = real_pos - real_neg
-    imag_pos = imag[:900, :128]
-    imag_pos += imag[900:, 128:]
-    imag_neg = imag[900:, :128]
-    imag_neg += imag[:900, 128:]
+    imag_pos = imag[:n_samples, :n_chirps]
+    imag_pos += imag[n_samples:, n_chirps:]
+    imag_neg = imag[n_samples:, :n_chirps]
+    imag_neg += imag[:n_samples, n_chirps:]
     imag_total = imag_pos - imag_neg
 
     # Calculate the modulus of the complex valued results, and add a small

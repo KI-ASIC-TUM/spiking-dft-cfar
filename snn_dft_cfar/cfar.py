@@ -80,6 +80,86 @@ class TraditionalCFAR():
         test_value = np_array[self.neighbour_cells+self.guarding_cells]
         return test_value, neighbours
 
+    def roi_2d(self,np_array):
+        """
+        roi_2d determines the Region Of Interest, e.g. the test cell and the 
+        neighbor values.
+
+        @param np_array: np.array with ndim == 2
+        """
+        # DEBUG
+        # np_array = np.array(range(np_array.size)).reshape((7,7))
+        # #np_array.fill(1.)
+        # np_array[self.neighbour_cells:self.neighbour_cells+2*self.guarding_cells+1,
+        #         self.neighbour_cells:self.neighbour_cells+2*self.guarding_cells+1].fill(100.)
+        # np_array[self.neighbour_cells+self.guarding_cells,
+        #                       self.neighbour_cells+self.guarding_cells] = 200.
+
+
+        no_neighbours = np_array.size - (2*self.guarding_cells+1)**2
+        #print(no_neighbours-3)
+        neighbours = np.empty(no_neighbours)
+
+        # read out neighbours
+        cntr = 0
+        cntr2 = 0
+        for row in range(np_array.shape[0]):
+            if row < self.neighbour_cells:
+                chunk = np_array[row,:]
+                neighbours[cntr:cntr+chunk.size] = chunk
+                cntr += chunk.size
+                # print('chunk',cntr2, 'row',row)
+                # print(chunk)
+                # cntr2 += 1
+            elif row < self.neighbour_cells+2*self.guarding_cells+1:
+                chunk = np_array[row,:self.neighbour_cells]
+                neighbours[cntr:cntr+chunk.size] = chunk
+                cntr += chunk.size
+                # print('chunk',cntr2, 'row',row)
+                # print(chunk)
+                # cntr2 += 1
+                chunk = np_array[row,
+                                 self.neighbour_cells+2*self.guarding_cells+1:]
+                neighbours[cntr:cntr+chunk.size] = chunk
+                cntr += chunk.size
+                # print('chunk',cntr2, 'row',row)
+                # print(chunk)
+                # cntr2 += 1
+            else:
+                chunk = np_array[row,:]
+                neighbours[cntr:cntr+chunk.size] = chunk
+                cntr += chunk.size
+                # print('chunk',cntr2, 'row',row)
+                # print(chunk)
+                # cntr2 += 1
+            
+
+        # # DEBUG
+        # print('guarding cells')
+        # print(self.guarding_cells)
+        # print('neighbour cells')
+        # print(self.neighbour_cells)
+        # print('input')
+        # print(np_array)
+        # print('neighbours')
+        # print(neighbours)
+        # print('test value')
+        # print(np_array[self.neighbour_cells+self.guarding_cells,
+        #                       self.neighbour_cells+self.guarding_cells])
+        # 
+        # raise SystemExit
+
+        if (cntr != no_neighbours):
+            error = """
+            In roi_2d. cntr ({}) does not add up to all neighbor cells ({}).
+            """.format(cntr,no_neighbours)
+            raise ValueError(error)
+
+        # test value can be found in the center
+        test_value = np_array[self.neighbour_cells+self.guarding_cells,
+                              self.neighbour_cells+self.guarding_cells]
+        return test_value, neighbours
+
     
     def cfar_1d(self,np_array):
         """
@@ -97,21 +177,11 @@ class TraditionalCFAR():
         self.results = np.zeros(total_windows)
         self.threshold = np.zeros_like(self.results)
 
-        # DEBUG
-        #print('input array')
-        #print(np_array)
-
         # iterate in sliding window fashion over input array
         for i in range(total_windows):
             # determine regions of interest
             test_value, neighbour_values = self.roi_1d(
                                             np_array[i:i+window_size])
-            # compute statistical measure
-            #stat = self.statistical_measure(neighbour_values)
-            # save threshold
-            #self.threshold[i] = stat / self.scale_factor
-            # save results
-            #self.results[i] = self.compare(test_value,stat)
             self.cfar_1d_core(i,test_value,neighbour_values)
 
         # return results array    
@@ -138,10 +208,30 @@ class TraditionalCFAR():
         @param np_array: np.array with ndim == 2
         """
 
-        error = """
-        2D CFAR is not yet implemented
-        """
-        raise SystemError(error)
+        # compute sizes related to sliding window 
+        N_x,N_y = np_array.shape
+        window_size = 2*self.neighbour_cells + 2*self.guarding_cells + 1
+        total_windows_x = N_x-window_size+1
+        total_windows_y = N_y-window_size+1
+        
+        # initialize solution arrays
+        self.results = np.zeros(total_windows_x*total_windows_y)
+        self.threshold = np.zeros_like(self.results)
+
+        # iterate in sliding window fashion over input array
+        for i,j in np.ndindex(total_windows_x,total_windows_y):
+            # determine regions of interest
+            test_value, neighbour_values = self.roi_2d(
+                                            np_array[i:i+window_size,
+                                                     j:j+window_size])
+            self.cfar_1d_core(total_windows_y*i+j,test_value,neighbour_values)
+
+        # reshape results
+        self.results.reshape((total_windows_x,total_windows_y))
+        self.threshold.reshape((total_windows_x,total_windows_y))
+
+        # return results array    
+        return self.results
         
     def run(self, np_array):
         """

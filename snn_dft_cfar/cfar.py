@@ -6,7 +6,9 @@ Library containing CFAR implementations
 from abc import ABC, abstractmethod
 import numpy as np
 import matplotlib.pyplot as plt
+from timeit import default_timer as timer
 import brian2
+
 # Local libraries
 from snn_dft_cfar.utils.encoding import TimeEncoder
 
@@ -29,6 +31,7 @@ class TraditionalCFAR():
         """
 
         self.name = 'generic cfar'
+        self.processing_time = 0.
 
         # Store encoder parameteres
         self.scale_factor = scale_factor
@@ -102,7 +105,7 @@ class TraditionalCFAR():
 
         # read out neighbours
         cntr = 0
-        cntr2 = 0
+        #cntr2 = 0
         for row in range(np_array.shape[0]):
             if row < self.neighbour_cells:
                 chunk = np_array[row,:]
@@ -227,8 +230,8 @@ class TraditionalCFAR():
             self.cfar_1d_core(total_windows_y*i+j,test_value,neighbour_values)
 
         # reshape results
-        self.results.reshape((total_windows_x,total_windows_y))
-        self.threshold.reshape((total_windows_x,total_windows_y))
+        self.results=self.results.reshape((total_windows_x,total_windows_y))
+        self.threshold=self.threshold.reshape((total_windows_x,total_windows_y))
 
         # return results array    
         return self.results
@@ -244,16 +247,21 @@ class TraditionalCFAR():
         self.results = np.empty(1)
 
         dim = np_array.ndim
+        start = timer()
         if dim == 1:
-            return self.cfar_1d(np_array)
+            self.cfar_1d(np_array)
         elif dim == 2:
-            return self.cfar_2d(np_array)
+            self.cfar_2d(np_array)
         else:
             error = """
             CFAR alorithm received wrong a np.array of unexpected dimension {}.
             Expected dimension to be 1 or 2.
             """
             raise SystemError(error)
+        end = timer()
+        self.processing_time = end-start
+
+        return self.results
 
     def plot(self):
         """
@@ -262,10 +270,7 @@ class TraditionalCFAR():
         if self.input_array.ndim == 1:
             self.plot_1d()
         elif self.input_array.ndim == 2:
-            error = """
-            2D CFAR plotting is not yet implemented
-            """
-            raise ValueError(error)
+            self.plot_2d()
     
     def plot_1d(self):
         """
@@ -305,6 +310,33 @@ class TraditionalCFAR():
         plt.ylabel('signal')
         plt.title(self.name)
         plt.show()
+
+    def plot_2d(self):
+        """
+        Visualize the 1D input and output data.
+        """
+
+        # DEBUG
+        # print(np.where(self.results>0))
+
+        result = np.zeros_like(self.input_array)
+        temp = self.guarding_cells+self.neighbour_cells
+        result[temp:temp+self.results.shape[0],
+               temp:temp+self.results.shape[1]] = self.results
+
+        fig, (ax1, ax2, ax3) = plt.subplots( 3)
+        fig.suptitle('2D {}'.format(self.name))
+        ax1.imshow(self.input_array)
+        ax1.set_xlabel('raw data')
+        ax2.imshow(np.log10(self.input_array))
+        ax2.set_xlabel('np log10 data')
+        ax3.imshow(result)
+        ax3.set_xlabel('cfar detection')
+        plt.show()
+        # plt.imshow(self.input_array)
+        # plt.show()
+        # plt.imshow(self.results)
+        # plt.show()
 
 
 class CACFAR(TraditionalCFAR):
@@ -375,6 +407,7 @@ class OSCFAR_SNN(TraditionalCFAR):
         super(OSCFAR_SNN,self).__init__(scale_factor,guarding_cells,
                                         neighbour_cells)
         self.name = 'OS-CFAR SNN'
+        self.brian_sim_time = 0.
 
         # OSCFAR needs an integer k for determining the k-th largest value
         self.k = k
@@ -444,7 +477,10 @@ class OSCFAR_SNN(TraditionalCFAR):
         spikemon = brian2.SpikeMonitor(compute_neuron)
         
         # run Brian2 simulation
+        start_local = timer()
         brian2.run(simulation_time)
+        end_local = timer()
+        self.brian_sim_time += (end_local-start_local)
         
         # return 1 if spike occurs, 0 if not.
         self.results[i] = len(spikemon.t)

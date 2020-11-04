@@ -90,67 +90,29 @@ class TraditionalCFAR():
 
         @param np_array: np.array with ndim == 2
         """
-        # DEBUG
-        # np_array = np.array(range(np_array.size)).reshape((7,7))
-        # #np_array.fill(1.)
-        # np_array[self.neighbour_cells:self.neighbour_cells+2*self.guarding_cells+1,
-        #         self.neighbour_cells:self.neighbour_cells+2*self.guarding_cells+1].fill(100.)
-        # np_array[self.neighbour_cells+self.guarding_cells,
-        #                       self.neighbour_cells+self.guarding_cells] = 200.
-
-
         no_neighbours = np_array.size - (2*self.guarding_cells+1)**2
-        #print(no_neighbours-3)
         neighbours = np.empty(no_neighbours)
 
         # read out neighbours
         cntr = 0
-        #cntr2 = 0
         for row in range(np_array.shape[0]):
             if row < self.neighbour_cells:
                 chunk = np_array[row,:]
                 neighbours[cntr:cntr+chunk.size] = chunk
                 cntr += chunk.size
-                # print('chunk',cntr2, 'row',row)
-                # print(chunk)
-                # cntr2 += 1
             elif row < self.neighbour_cells+2*self.guarding_cells+1:
                 chunk = np_array[row,:self.neighbour_cells]
                 neighbours[cntr:cntr+chunk.size] = chunk
                 cntr += chunk.size
-                # print('chunk',cntr2, 'row',row)
-                # print(chunk)
-                # cntr2 += 1
                 chunk = np_array[row,
                                  self.neighbour_cells+2*self.guarding_cells+1:]
                 neighbours[cntr:cntr+chunk.size] = chunk
                 cntr += chunk.size
-                # print('chunk',cntr2, 'row',row)
-                # print(chunk)
-                # cntr2 += 1
             else:
                 chunk = np_array[row,:]
                 neighbours[cntr:cntr+chunk.size] = chunk
                 cntr += chunk.size
-                # print('chunk',cntr2, 'row',row)
-                # print(chunk)
-                # cntr2 += 1
-            
-
-        # # DEBUG
-        # print('guarding cells')
-        # print(self.guarding_cells)
-        # print('neighbour cells')
-        # print(self.neighbour_cells)
-        # print('input')
-        # print(np_array)
-        # print('neighbours')
-        # print(neighbours)
-        # print('test value')
-        # print(np_array[self.neighbour_cells+self.guarding_cells,
-        #                       self.neighbour_cells+self.guarding_cells])
-        # 
-        # raise SystemExit
+        
 
         if (cntr != no_neighbours):
             error = """
@@ -316,9 +278,6 @@ class TraditionalCFAR():
         Visualize the 1D input and output data.
         """
 
-        # DEBUG
-        # print(np.where(self.results>0))
-
         result = np.zeros_like(self.input_array)
         temp = self.guarding_cells+self.neighbour_cells
         result[temp:temp+self.results.shape[0],
@@ -333,10 +292,6 @@ class TraditionalCFAR():
         ax3.imshow(result)
         ax3.set_xlabel('cfar detection')
         plt.show()
-        # plt.imshow(self.input_array)
-        # plt.show()
-        # plt.imshow(self.results)
-        # plt.show()
 
 
 class CACFAR(TraditionalCFAR):

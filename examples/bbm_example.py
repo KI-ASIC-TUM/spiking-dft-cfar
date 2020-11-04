@@ -11,6 +11,7 @@ import snn_dft_cfar.pipeline
 import snn_dft_cfar.dft
 import snn_dft_cfar.utils.read_data
 import snn_dft_cfar.utils.plot_tools
+from snn_dft_cfar.utils.plot_tools import plot_cfar
 from snn_dft_cfar.cfar import CACFAR, OSCFAR, OSCFAR_SNN
 
 
@@ -85,7 +86,7 @@ def example_1d(chirp, FT, CFAR, guarding_cells, neighbour_cells,
                             brian_time, brian_time /cfar.results.size )
 
     # visualize result
-    cfar.plot()
+    plot_cfar(cfar)
 
 def example_2d(data_cube, FT, CFAR, guarding_cells, neighbour_cells, 
                    scale_factor, k, t_max, t_min, x_max, x_min):
@@ -144,7 +145,7 @@ def example_2d(data_cube, FT, CFAR, guarding_cells, neighbour_cells,
                             brian_time, brian_time /cfar.results.size )
 
     # visualize result
-    cfar.plot()
+    plot_cfar(cfar)
 
 def main(filename="../data/BBM/samples_ch_1_scenario2.txt", dims=1):
 
@@ -196,4 +197,4 @@ def main(filename="../data/BBM/samples_ch_1_scenario2.txt", dims=1):
 
 
 if __name__ == "__main__":
-    main(dims=2)
+    main(dims=1)

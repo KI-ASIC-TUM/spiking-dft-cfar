@@ -1,6 +1,7 @@
 import numpy as np
 from timeit import default_timer as timer
 from snn_dft_cfar.cfar import CACFAR, OSCFAR, OSCFAR_SNN
+from snn_dft_cfar.utils.plot_tools import plot_cfar
 
 # define parameters
 data_size = 50
@@ -69,6 +70,6 @@ print("Third  plot: SNNOSCFAR")
 print("Note that the OSCFAR and SNNOSCFAR should detect the same peaks.")
 print((68+11)*"=")
 print()
-cacfar.plot()
-oscfar.plot()
-snnoscfar.plot()
+plot_cfar(cacfar)
+plot_cfar(oscfar)
+plot_cfar(snnoscfar)

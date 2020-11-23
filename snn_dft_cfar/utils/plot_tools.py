@@ -79,3 +79,76 @@ def plot_2dfft(dft_data):
     ax.set_title("Spiking Neural Network")
     plt.show()
     return fig
+
+
+def plot_cfar(cfar_object):
+    """
+    Visualize the input and output data.
+    """
+    if cfar_object.input_array.ndim == 1:
+        plot_cfar_1d(cfar_object)
+    elif cfar_object.input_array.ndim == 2:
+        plot_cfar_2d(cfar_object)
+
+def plot_cfar_1d(cfar_object):
+    """
+    Visualize the 1D input and output data.
+    """
+
+    # plot input data
+    plt.plot(cfar_object.input_array,label = 'signal')
+
+    # plot threshold line
+    if cfar_object.show_threshold:
+        low = cfar_object.guarding_cells+cfar_object.neighbour_cells
+        high = cfar_object.guarding_cells+cfar_object.neighbour_cells+ \
+                cfar_object.threshold.size
+        plt.plot(range(low,high),cfar_object.threshold,ls='dotted',lw=1, c='C3', 
+                label='threshold')
+
+    # plot detected peaks
+    cntr = 0
+    for x in np.where(cfar_object.results>=1)[0]:
+        if cntr == 0:
+            plt.axvline(x+cfar_object.guarding_cells+ \
+                        cfar_object.neighbour_cells,ls='--',
+                        c='C1',lw=1,label='detected peaks')
+            cntr +=1
+        else:
+            plt.axvline(x+cfar_object.guarding_cells+ \
+                        cfar_object.neighbour_cells,ls='--',
+                        c='C1',lw=1)
+
+    # plot boundaries where algorithm works properly
+    plt.axvline(cfar_object.guarding_cells+cfar_object.neighbour_cells-1,
+                ls='--',c='C2',lw=1,label='algorithm boundaries')
+    plt.axvline(cfar_object.results.size+cfar_object.guarding_cells+
+                cfar_object.neighbour_cells,
+                ls='--', c='C2',lw=1)
+    
+    # show plot
+    plt.legend()
+    plt.grid(True)
+    plt.ylabel('signal')
+    plt.title(cfar_object.name)
+    plt.show()
+
+def plot_cfar_2d(cfar_object):
+    """
+    Visualize the 2D input and output data.
+    """
+
+    result = np.zeros_like(cfar_object.input_array)
+    temp = cfar_object.guarding_cells+cfar_object.neighbour_cells
+    result[temp:temp+cfar_object.results.shape[0],
+            temp:temp+cfar_object.results.shape[1]] = cfar_object.results
+
+    fig, (ax1, ax2, ax3) = plt.subplots( 3)
+    fig.suptitle('2D {}'.format(cfar_object.name))
+    ax1.imshow(cfar_object.input_array)
+    ax1.set_xlabel('raw data')
+    ax2.imshow(np.log10(cfar_object.input_array))
+    ax2.set_xlabel('np log10 data')
+    ax3.imshow(result)
+    ax3.set_xlabel('cfar detection')
+    plt.show()

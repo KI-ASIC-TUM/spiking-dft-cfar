@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Main description of the module.
+Module implementing DFT+CFAR SNN using the BBM dataset as input
 """
 # Standard libraries
 import numpy as np
@@ -15,7 +15,7 @@ from snn_dft_cfar.utils.plot_tools import plot_cfar
 from snn_dft_cfar.cfar import CACFAR, OSCFAR, OSCFAR_SNN
 
 
-def print_benchmark_message(fft,fft_to_cfar,cfar_time,cfar_time_per_sample,
+def print_benchmark_message(fft, fft_to_cfar, cfar_time, cfar_time_per_sample,
                             brian_time, brian_time_per_sample):
     print()
     print(24*'=','Benchmark SNN Radar Processing',24*'=')
@@ -28,15 +28,14 @@ def print_benchmark_message(fft,fft_to_cfar,cfar_time,cfar_time_per_sample,
     print(80*'=','\n')
 
 def example_1d(chirp, FT, CFAR, guarding_cells, neighbour_cells, 
-                   scale_factor, k, t_max, t_min, x_max, x_min):
+               scale_factor, k, t_max, t_min, x_max, x_min):
     """
-    Run DFT and CFAR on a one dimensional numpy array. All parameters are 
-    documented in the CFAR child classes. Besides:
+    Run DFT and CFAR on a one dimensional numpy array
+
+    All parameters are documented in the CFAR child classes
 
     @param chirp: 1D numpy array that corresponds to the signal.
     """
-
-    
     if FT == 'FFT':
         start = timer()
         adjusted_data = np.abs(np.fft.fft(chirp))
@@ -59,16 +58,15 @@ def example_1d(chirp, FT, CFAR, guarding_cells, neighbour_cells,
     else:
         error = 'Your choice for FT ({}) is not valid.'.format(FT)
         raise ValueError(error) 
-    
 
     # instanciate CFAR dependening on choice
     if CFAR == 'OSCFARSNN':
-        cfar = OSCFAR_SNN(scale_factor,guarding_cells,neighbour_cells,k,
+        cfar = OSCFAR_SNN(scale_factor, guarding_cells, neighbour_cells, k,
                           t_max, t_min, x_max, x_min)
     elif CFAR == 'OSCFAR':
-        cfar = OSCFAR(scale_factor,guarding_cells,neighbour_cells,k)
+        cfar = OSCFAR(scale_factor, guarding_cells, neighbour_cells,k)
     elif CFAR == 'CACFAR':
-        cfar = CACFAR(scale_factor,guarding_cells,neighbour_cells)
+        cfar = CACFAR(scale_factor, guarding_cells, neighbour_cells)
     else:
         error = 'Your choice for CFAR ({}) is not valid.'.format(CFAR)
         raise ValueError(error)
@@ -91,8 +89,9 @@ def example_1d(chirp, FT, CFAR, guarding_cells, neighbour_cells,
 def example_2d(data_cube, FT, CFAR, guarding_cells, neighbour_cells, 
                    scale_factor, k, t_max, t_min, x_max, x_min):
     """
-    Run DFT and CFAR on a two dimensional numpy array. CFAR 2D not implemented 
-    yet.
+    Run DFT and CFAR on a two dimensional numpy array
+
+    CFAR 2D not implemented yet.
 
     @param data_cube: 2D numpy array that corresponds to the signals.
     """
@@ -148,7 +147,7 @@ def example_2d(data_cube, FT, CFAR, guarding_cells, neighbour_cells,
     plot_cfar(cfar)
 
 def main(filename="../data/BBM/samples_ch_1_scenario2.txt", dims=1):
-
+    #TODO: Add argparser for letting user select CFAR and DFT method
     # Load data cube from simulation data;
     # Only the 900 first samples contain information
     data_cube = snn_dft_cfar.utils.read_data.bbm_get_datacube(filename)[:, :900]

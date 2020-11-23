@@ -92,7 +92,8 @@ class LinearFrequencyEncoder(Encoder):
 
 class TimeEncoder(Encoder):
     """
-    Time encoder. Encodes np.array or single values into the time domain. 
+    Encodes array or single values into the time domain.
+
     Higher numbers spike at earlier times. Formula of encoding:
 
     LaTeX:
@@ -140,11 +141,15 @@ class TimeEncoder(Encoder):
 
     def run(self, values):
         """
-        Returns the time encoding of the value(s). Encoding formula in LaTeX:
+        Returns the time encoding of the value(s)
+
+        Encoding formula in LaTeX:
         t_i = (t_{max}-t_{min}) cdot 
               (1- frac{x_i - x_{min}}{x_{max}-x_{min}} ) + t_{min}
 
         @param values: np.array / float / double to encode
         """
-        return (self.t_max-self.t_min) * (1-(values - self.x_min) / 
-               (self.x_max-self.x_min)) + self.t_min
+        time_range = self.t_max - self.t_min
+        value_range = self.x_max - self.x_min
+        result = self.t_min + time_range * (1-(values-self.x_min)) / value_range
+        return result

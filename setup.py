@@ -11,6 +11,6 @@ setup(
     install_requires=[
         "numpy>=1.16",
         "matplotlib>=3.1.2",
-        "brian2>=2.4.1",
+        "numba>=0.51.2",
     ],
 )

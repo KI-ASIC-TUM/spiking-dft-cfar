@@ -16,15 +16,15 @@ from snn_dft_cfar.cfar import CACFAR, OSCFAR, OSCFAR_SNN
 
 
 def print_benchmark_message(fft, fft_to_cfar, cfar_time, cfar_time_per_sample,
-                            brian_time, brian_time_per_sample):
+                            sim_time, sim_time_per_sample):
     print()
     print(24*'=','Benchmark SNN Radar Processing',24*'=')
     print('FFT                     : {0:.6f}'.format(fft))
     print('FFT to CFAR             : {0:.6f}'.format(fft_to_cfar))
     print('CFAR                    : {0:.6f}'.format(cfar_time))
     print('CFAR per iteration      : {0:.6f}'.format(cfar_time_per_sample))
-    print('Brian 2 in CFAR         : {0:.6f}'.format(brian_time))
-    print('Brian 2 in CFAR per it. : {0:.6f}'.format(brian_time_per_sample))
+    print('SNN simulation time     : {0:.6f}'.format(sim_time))
+    print('SNN simulation per it.  : {0:.6f}'.format(sim_time_per_sample))
     print(80*'=','\n')
 
 def example_1d(chirp, FT, CFAR, guarding_cells, neighbour_cells, 
@@ -76,12 +76,12 @@ def example_1d(chirp, FT, CFAR, guarding_cells, neighbour_cells,
 
     # print benchmark
     if CFAR == 'CACFAR' or CFAR == 'OSCFAR':
-        brian_time = 0
+        sim_time = 0
     else:
-        brian_time = cfar.brian_sim_time
+        sim_time = cfar.sim_time
     print_benchmark_message(fft_time,fft_to_cfar_time,cfar.processing_time,
                             cfar.processing_time/cfar.results.size,
-                            brian_time, brian_time /cfar.results.size )
+                            sim_time, sim_time /cfar.results.size )
 
     # visualize result
     plot_cfar(cfar)
@@ -136,12 +136,12 @@ def example_2d(data_cube, FT, CFAR, guarding_cells, neighbour_cells,
 
     # print benchmark
     if CFAR == 'CACFAR' or CFAR == 'OSCFAR':
-        brian_time = 0
+        sim_time = 0
     else:
-        brian_time = cfar.brian_sim_time
+        sim_time = cfar.sim_time
     print_benchmark_message(fft_time,fft_to_cfar_time,cfar.processing_time,
                             cfar.processing_time/cfar.results.size,
-                            brian_time, brian_time /cfar.results.size )
+                            sim_time, sim_time /cfar.results.size )
 
     # visualize result
     plot_cfar(cfar)

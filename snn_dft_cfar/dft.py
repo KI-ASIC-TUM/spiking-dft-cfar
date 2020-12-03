@@ -231,7 +231,9 @@ def adjust_2dfft_data(input_data):
     modulus = np.sqrt(real_total**2+imag_total**2) + 0.1
 
     width, height = modulus.shape
-    positive_range = modulus[1:int(width/2), :]
+    # Remove negative side of the spectrum. Resulting spectrum is "upside-down",
+    # so samples have to be taken backwards
+    positive_range = modulus[int(width/2):1:-1, :]
     # Re-adjust the plot so the velocity spectrum is centered around zero
     result = np.copy(positive_range)
     result[:, :int(height/2)] = positive_range[:, int(height/2):]

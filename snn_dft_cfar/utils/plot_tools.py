@@ -8,8 +8,8 @@ import numpy as np
 
 
 def format_plotting():
-    plt.rcParams['figure.figsize'] = (10, 4)
-    plt.rcParams['font.size'] = 22
+    # plt.rcParams['figure.figsize'] = (10, 4)
+    plt.rcParams['font.size'] = 16
     #    plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
     plt.rcParams['axes.titlesize'] = 1.2 * plt.rcParams['font.size']
@@ -38,7 +38,7 @@ def format_plotting():
     plt.gca().yaxis.set_ticks_position('left')
     return
 
-def plot_1dfft(dft_data):
+def plot_1dfft(dft_data, title="Spiking DFT"):
     # Radar parameters
     c = 3 * 10**2   # [m/us]
     f_max = 24 / 2  # [GHz]
@@ -48,15 +48,17 @@ def plot_1dfft(dft_data):
     
     freq_bins = np.arange(0, d_max, d_max/dft_data.size)
     # Plot results
-    fig = plt.figure()
+    fig = plt.figure(figsize=(14,5))
+    format_plotting()
     ax = fig.add_subplot(111)
     ax.plot(freq_bins, dft_data)
     ax.set_xlabel("Range (m)")
-    ax.set_title("Spiking Neural Network DFT")
+    ax.set_title(title)
+    plt.tight_layout()
     plt.show()
     return fig
 
-def plot_2dfft(dft_data):
+def plot_2dfft(dft_data, title="Spiking DFT"):
     # Radar parameters
     f_s = 77        # [GHz]
     c = 3 * 10**2   # [m/us]
@@ -71,12 +73,12 @@ def plot_2dfft(dft_data):
     v_min = v_max / n_chirps
 
     fig, ax = plt.subplots(figsize=(6,6))
-    ax.imshow(20*np.log10(dft_data), extent=[-v_max, v_max-2*v_min, 0, d_max],
-              origin='lower')
+    format_plotting()
+    ax.imshow(20*np.log10(dft_data), extent=[-v_max, v_max-2*v_min, 0, d_max],)
     ax.set_xlabel("Speed (m/s)")
     ax.set_ylabel("Range (m)")
     ax.set_aspect("auto")
-    ax.set_title("Spiking Neural Network")
+    ax.set_title(title)
     plt.show()
     return fig
 

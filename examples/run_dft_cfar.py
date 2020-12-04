@@ -8,29 +8,24 @@ It is possible to run it both spiking and non-spiking
 import matplotlib.pyplot as plt
 import numpy as np
 # Local libraries
-import run_dft
+import snn_dft_cfar.cfar
+import snn_dft_cfar.dft
 import snn_dft_cfar.utils.read_data
 import snn_dft_cfar.utils.plot_tools
 
 
-def dft_cfar_1d(chirp, cfar_args, method="snn"):
-    dft = run_dft.dft_1d(chirp, method)
+def dft_cfar(chirp, dimensions, cfar_args, method="SNN"):
+    dft = snn_dft_cfar.dft.dft(chirp, dimensions, method)
     cfar = run_cfar(dft, cfar_args, method)
     return dft, cfar
 
 
-def dft_cfar_2d(data_cube, cfar_args, method="snn"):
-    dft = run_dft.dft_2d(data_cube, method)
-    cfar = run_cfar(dft, cfar_args, method)
-    return dft, cfar
-
-
-def run_cfar(chirp, cfar_args, method="snn"):
+def run_cfar(dft_data, cfar_args, method="SNN"):
     if method=="numpy":
         cfar = snn_dft_cfar.cfar.OSCFAR(**cfar_args)
-    elif method=="snn":
+    elif method=="SNN":
         cfar = snn_dft_cfar.cfar.OSCFAR_SNN(**cfar_args)
-    cfar(chirp)
+    cfar(dft_data)
     return cfar
 
 
@@ -51,7 +46,7 @@ def get_cfar_args(dims, method):
     Return default CFAR arguments
     """
     # Get default time-encoding parameters
-    if method=="snn":
+    if method=="SNN":
         encoding_parameters = {
             "t_max": 50,
             "t_min": 0,
@@ -80,7 +75,7 @@ def get_cfar_args(dims, method):
     return cfar_args
 
 
-def main(dims=1, method="numpy",
+def main(dims=2, method="numpy",
          filename="../data/BBM/scenario1/samples_ch_1_scenario1.txt"):
     # Only the 900 first samples contain information
     data_cube = snn_dft_cfar.utils.read_data.bbm_get_datacube(filename)[:, :900]
@@ -89,9 +84,10 @@ def main(dims=1, method="numpy",
     # Run corresponding routine based on the number of dimensions
     if dims==1:
         chirp_n = 15
-        dft, cfar = dft_cfar_1d(data_cube[chirp_n], cfar_args, method)
-    if dims==2:        
-        dft, cfar = dft_cfar_2d(data_cube, cfar_args, method)
+        raw_data = data_cube[chirp_n]
+    if dims==2:
+        raw_data = data_cube
+    dft, cfar = dft_cfar(raw_data, dims, cfar_args, method)
     plot(dft, cfar, dims, method)
     return
 

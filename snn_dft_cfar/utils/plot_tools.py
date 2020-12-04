@@ -53,7 +53,7 @@ def plot_1dfft(dft_data, title="Spiking DFT", show=True):
     # Calculate maximum range
     d_max = (f_max*c) / (2*S)
     
-    freq_bins = np.arange(0, d_max, d_max/dft_data.size)
+    freq_bins = np.arange(0, d_max, d_max/dft_data.size)[:dft_data.size]
     # Plot results
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14, 5))
     format_plotting()
@@ -106,6 +106,7 @@ def plot_cfar_1d(cfar_object, show=True):
     Visualize the 1D input and output data.
     """
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14, 5))
+    format_plotting()
     # plot input data
     ax.plot(cfar_object.input_array, label='signal')
 
@@ -169,18 +170,9 @@ def plot_cfar_2d(cfar_object, show=True):
     temp = cfar_object.guarding_cells+cfar_object.neighbour_cells
     result[temp:temp+cfar_object.results.shape[0],
             temp:temp+cfar_object.results.shape[1]] = cfar_object.results
-
-    # Plot input 2D DFT
-    fft_2d = cfar_object.input_array
-    fig, ax = plt.subplots(figsize=(6,6))
-    ax.imshow(20*np.log10(fft_2d), extent=[-v_max, v_max-2*v_min, 0, d_max])
-    ax.set_aspect("auto")
-    plt.xlabel("Speed frequency (To Do)")
-    plt.ylabel("Range frequency (GHz)")
-    plt.title("2D Fourier Transform of the data cube")
     
     # Plot output 2D CFAR
-    fig_2, ax_2 = plt.subplots(figsize=(6,6))
+    fig, ax_2 = plt.subplots(figsize=(6,6))
     ax_2.imshow(result, extent=[-v_max, v_max-2*v_min, 0, d_max])
     ax_2.set_aspect("auto")
     plt.xlabel("Speed frequency (To Do)")
@@ -190,4 +182,4 @@ def plot_cfar_2d(cfar_object, show=True):
     if show:
         plt.show()
 
-    return fig_2
+    return fig

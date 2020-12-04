@@ -151,5 +151,5 @@ class TimeEncoder(Encoder):
         """
         time_range = self.t_max - self.t_min
         value_range = self.x_max - self.x_min
-        result = self.t_min + time_range * (1-(values-self.x_min)) / value_range
+        result = self.t_max - time_range * (values-self.x_min) / value_range
         return result

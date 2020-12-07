@@ -1,13 +1,35 @@
 #!/usr/bin/env python3
 """
-Functions for running the 1D and 2D DFT and OS-CFAR
-
-It is possible to run it both spiking and non-spiking
+Main file for running the spiking_dft_cfar library
 """
 # Standard libraries
+import argparse
 import json
 # Local libraries
 import snn_dft_cfar.run_dft_cfar
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        usage="main.py [-h] [-d {1 2}] [-m {numpy SNN}] config_file"
+    )
+    parser.add_argument("config_file", type=str,
+                        help="Relative location of the configuration file"
+                       )
+    parser.add_argument("-d", "--dimensions", type=int, choices=[1, 2],
+                        default=1, metavar="",
+                        help="{1 | 2} number of DFT dimensions"
+                       )
+    parser.add_argument("-m", "--method", type=str, choices=["numpy", "SNN"],
+                        default="SNN", metavar="",
+                        help="{numpy | SNN} method used for running the system"
+                       )
+    # Get the values from the argument list
+    args = parser.parse_args()
+    config_file = args.config_file
+    dimensions = args.dimensions
+    method = args.method
+    return (config_file, dimensions, method)
 
 
 def load_config(config_file, dims, method):
@@ -30,7 +52,8 @@ def load_config(config_file, dims, method):
     return (filename, cfar_args)
 
 
-def main(dims=1, method="numpy", config_file="config/scenario1_default.json"):
+def main():
+    config_file, dims, method = parse_args()
     filename, cfar_args = load_config(config_file, dims, method)
     # Only the 900 first samples contain information
     data_cube = snn_dft_cfar.utils.read_data.bbm_get_datacube(filename)[:, :900]

@@ -5,6 +5,7 @@ Functions for running the 1D and 2D DFT and OS-CFAR
 It is possible to run it both spiking and non-spiking
 """
 # Standard libraries
+import json
 import matplotlib.pyplot as plt
 import numpy as np
 # Local libraries
@@ -41,46 +42,29 @@ def plot(dft, cfar, dims, method):
     return
 
 
-def get_cfar_args(dims, method):
+def load_config(config_file, dims, method):
     """
-    Return default CFAR arguments
+    Load the configuration file with the simulation parameters
+
+    @param config_file: str with the relative address of the config file
+    @param dims: Number of Fourier dimensions of the experiment 
     """
-    # Get default time-encoding parameters
+    # Load configuaration data from local file
+    with open(config_file) as f:
+        config_data = json.load(f)
+    filename = config_data["filename"]
+    # Load the CFAR parameters
+    cfar_args = config_data["cfar_args"]["{}D".format(dims)]
+    # Append encoding parameteres if an SNN is used
+    encoding_parameters = config_data["encoding_parameters"]
     if method=="SNN":
-        encoding_parameters = {
-            "t_max": 50,
-            "t_min": 0,
-            "x_max": 100,
-            "x_min": 0
-        }
-    else:
-        encoding_parameters = {}
+        cfar_args.update(encoding_parameters)
+    return (filename, cfar_args)
 
-    # Get default CFAR parameters, based on number of dimensions
-    if dims==1:
-        cfar_args = {
-            "scale_factor": 0.2,
-            "guarding_cells": 6,
-            "neighbour_cells": 15,
-            "k": 6
-        }
-    else:
-        cfar_args = {
-            "scale_factor": 0.2,
-            "guarding_cells": 3,
-            "neighbour_cells": 4,
-            "k": 8
-        }
-    cfar_args.update(encoding_parameters)
-    return cfar_args
-
-
-def main(dims=2, method="numpy",
-         filename="../data/BBM/scenario1/samples_ch_1_scenario1.txt"):
+def main(dims=1, method="numpy", config_file="../config/scenario2_default.json"):
+    filename, cfar_args = load_config(config_file, dims, method)
     # Only the 900 first samples contain information
     data_cube = snn_dft_cfar.utils.read_data.bbm_get_datacube(filename)[:, :900]
-    # Load CFAR parameters
-    cfar_args = get_cfar_args(dims, method)
     # Run corresponding routine based on the number of dimensions
     if dims==1:
         chirp_n = 15

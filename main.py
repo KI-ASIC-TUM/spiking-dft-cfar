@@ -61,7 +61,7 @@ def load_config(config_file, dims, method):
         cfar_args.update(encoding_parameters)
     return (filename, cfar_args)
 
-def main(dims=1, method="numpy", config_file="../config/scenario2_default.json"):
+def main(dims=1, method="numpy", config_file="config/scenario1_default.json"):
     filename, cfar_args = load_config(config_file, dims, method)
     # Only the 900 first samples contain information
     data_cube = snn_dft_cfar.utils.read_data.bbm_get_datacube(filename)[:, :900]

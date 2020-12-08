@@ -4,12 +4,12 @@ Library containing CFAR implementations
 """
 # Standard/3rd party libraries
 from abc import ABC, abstractmethod
-import brian2.only as br2
 import matplotlib.pyplot as plt
 import numpy as np
 from timeit import default_timer as timer
 # Local libraries
 from snn_dft_cfar.utils.encoding import TimeEncoder
+from snn_dft_cfar.utils.if_neuron import simulate_IF_neuron
 
 
 class TraditionalCFAR():
@@ -279,7 +279,7 @@ class OSCFAR_SNN(TraditionalCFAR):
     Ordered Statistics CFAR algorithms.
     """
     def __init__(self, scale_factor, guarding_cells, neighbour_cells,
-                 k, t_max, t_min, x_max, x_min):
+                 k, t_max, t_min, x_max, x_min,t_step=0.01):
         """
         Initialization.
 
@@ -297,7 +297,7 @@ class OSCFAR_SNN(TraditionalCFAR):
         super(OSCFAR_SNN, self).__init__(scale_factor, guarding_cells,
                                         neighbour_cells)
         self.name = 'OS-CFAR SNN'
-        self.brian_sim_time = 0.
+        self.sim_time = 0.
 
         # OSCFAR needs an integer k for determining the k-th largest value
         self.k = k
@@ -310,6 +310,7 @@ class OSCFAR_SNN(TraditionalCFAR):
         self.t_min = t_min
         self.x_max = x_max
         self.x_min = x_min
+        self.t_step = t_step
 
     def cfar_1d_core(self,i,test_value,neighbour_values):
         """
@@ -330,48 +331,18 @@ class OSCFAR_SNN(TraditionalCFAR):
         spike_times[:neighbour_values.size] = neighbour_values[:]
         spike_times[-1] = test_value*self.scale_factor
         spike_times=time_encoder(spike_times)
-        spike_times = [x*br2.ms for x in spike_times]
 
         # define weights
         weights = np.ones(neighbour_values.size+1)
         weights *= -1
         weights[-1] = self.k
-
-        # start Brian2 SNN simulation
-        br2.start_scope()
-        simulation_time = 1.1*self.t_max*br2.ms
-
-        # define neuron group that spikes at specific input times
-        input_neurons = br2.NeuronGroup(len(spike_times),
-                                           'tspike:second',
-                                           threshold='t>tspike', 
-                                           refractory= simulation_time)
-        input_neurons.tspike = spike_times
-
-        # define IF neuron according to previous explanations 
-        tau = 10*br2.ms
-        eqs = '''
-        dv/dt = 0./tau  : 1
-        '''
-        #TODO: Refractory not working
-        compute_neuron = br2.NeuronGroup(1, eqs, threshold='v>=1',
-                                            refractory= simulation_time,
-                                            reset='v = 0', method ='euler')
-
-        # establish connectivity of the network, weights from above
-        S = br2.Synapses(input_neurons,compute_neuron,'w:1',
-                            on_pre='v_post += w')
-        S.connect()
-        S.w = weights
-
-        # monitor spiking behaviour 
-        spikemon = br2.SpikeMonitor(compute_neuron)
-
-        # run br2 simulation
+ 
+        # simulate IF neuron
         start_local = timer()
-        br2.run(simulation_time)
+        res = simulate_IF_neuron(self.t_min,self.t_max,self.t_step,spike_times,
+                                 weights)
         end_local = timer()
-        self.brian_sim_time += (end_local-start_local)
-
+        self.sim_time += (end_local-start_local)
+        
         # return 1 if spike occurs, 0 if not.
-        self.results[i] = len(spikemon.t)
+        self.results[i] = res

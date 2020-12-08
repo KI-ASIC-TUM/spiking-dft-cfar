@@ -10,6 +10,9 @@ import snn_dft_cfar.run_dft_cfar
 
 
 def parse_args():
+    """
+    Obtain the simulation options from the input arguments
+    """
     parser = argparse.ArgumentParser(
         usage="main.py [-h] [-d {1 2}] [-m {numpy SNN}] config_file"
     )
@@ -53,6 +56,9 @@ def load_config(config_file, dims, method):
 
 
 def main():
+    """
+    Run the DFT and CFAR on BBM data
+    """
     config_file, dims, method = parse_args()
     filename, cfar_args = load_config(config_file, dims, method)
     # Only the 900 first samples contain information

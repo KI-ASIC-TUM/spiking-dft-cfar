@@ -14,13 +14,19 @@ import snn_dft_cfar.utils.read_data
 import snn_dft_cfar.utils.plot_tools
 
 
-def dft_cfar(chirp, dimensions, cfar_args, method="SNN"):
-    dft = snn_dft_cfar.dft.dft(chirp, dimensions, method)
+def dft_cfar(raw_data, dimensions, cfar_args, method="SNN"):
+    """
+    Call the routines for executing the DFT and the OS-CFAR
+    """
+    dft = snn_dft_cfar.dft.dft(raw_data, dimensions, method)
     cfar = run_cfar(dft, cfar_args, method)
     return dft, cfar
 
 
 def run_cfar(dft_data, cfar_args, method="SNN"):
+    """
+    Run the corresponding OS-CFAR algorithm on the provided DFT data
+    """
     if method=="numpy":
         cfar = snn_dft_cfar.cfar.OSCFAR(**cfar_args)
     elif method=="SNN":
@@ -30,6 +36,15 @@ def run_cfar(dft_data, cfar_args, method="SNN"):
 
 
 def plot(dft, cfar, dims, method):
+    """
+    Save figures containing the DFT and the CFAR of the experiment
+
+    @param dft: Numpy array containing the Fourier transform result
+    @param cfar: Numpy array containing the CFAR result
+    @param dims: Number of dimensions. Used for generating the file name
+    @param method: Method used for the algorithm, used for generating
+    the title of the plot and the file name. {numpy | snn}
+    """
     title = "{} DFT".format(method)
     # Obtain plot figures
     fig_dft = snn_dft_cfar.utils.plot_tools.plot_dft(dft, title, show=False)

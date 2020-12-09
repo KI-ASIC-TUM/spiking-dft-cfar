@@ -6,3 +6,12 @@ examples/results/
 
 # IPYNB checkpoints in example folder
 examples/.ipynb_checkpoints/
+
+# Experiment results and datasets
+**.csv
+**.eps
+**.png
+
+# Keras models
+**/models/**
+

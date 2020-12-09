@@ -7,8 +7,8 @@ import numpy as np
 from timeit import default_timer as timer
 
 # Local libraries
-import snn_dft_cfar.pipeline
 import snn_dft_cfar.dft
+import snn_dft_cfar.spiking_dft
 import snn_dft_cfar.utils.read_data
 import snn_dft_cfar.utils.plot_tools
 from snn_dft_cfar.utils.plot_tools import plot_cfar
@@ -146,7 +146,7 @@ def example_2d(data_cube, FT, CFAR, guarding_cells, neighbour_cells,
     # visualize result
     plot_cfar(cfar)
 
-def main(filename="../data/BBM/samples_ch_1_scenario2.txt", dims=1):
+def main(filename="../data/BBM/scenario1/samples_ch_1_scenario1.txt", dims=1):
     #TODO: Add argparser for letting user select CFAR and DFT method
     # Load data cube from simulation data;
     # Only the 900 first samples contain information
@@ -161,7 +161,7 @@ def main(filename="../data/BBM/samples_ch_1_scenario2.txt", dims=1):
     # Choose CFAR implentation. Available: 'CACFAR', 'OSCFAR', 'OSCFARSNN'
     # The latter two behave equivalently but 'OSCFAR' is significantly faster. 
     # Use it for prototyping.
-    CFAR = 'OSCFAR'
+    CFAR = 'OSCFARSNN'
     
     # Run pipeline (DFT+CFAR); currently 2D CFAR is not implented
     if dims == 2:

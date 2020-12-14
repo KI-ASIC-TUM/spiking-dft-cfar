@@ -206,21 +206,35 @@ class TraditionalCFAR():
 
         @param np_array: np.array with ndim == (1 or 2)
         """
+        # apply zero padding to arrays
+        dim = np_array.ndim
+        padding = self.guarding_cells + self.neighbour_cells
+        if dim == 1:
+            tmp = np.zeros(np_array.size+2*padding)
+            tmp[padding:padding+np_array.size] = np_array
+            np_array = tmp
+            del(tmp)
+        elif dim == 2:
+            r_dim, c_dim = np_array.shape
+            tmp = np.zeros((np_array.size+2*padding, np_array.size+2*padding))
+            tmp[padding:padding+r_dim, padding:padding+c_dim] = np_array
+            np_array = tmp
+        else:
+            error = """
+            CFAR alorithm received wrong a np.array of unexpected dimension {}.
+            Expected dimension 1 or 2.
+            """.format(dim)
+            raise ValueError(error)
+
         self.input_array = np_array.copy()
         self.results = np.empty(1)
 
-        dim = np_array.ndim
+        # run CFAR algorithm.
         start = timer()
         if dim == 1:
             self.cfar_1d(np_array)
         elif dim == 2:
             self.cfar_2d(np_array)
-        else:
-            error = """
-            CFAR alorithm received wrong a np.array of unexpected dimension {}.
-            Expected dimension to be 1 or 2.
-            """
-            raise ValueError(error)
         end = timer()
         self.processing_time = end-start
 

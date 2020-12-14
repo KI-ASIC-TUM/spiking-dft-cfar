@@ -43,11 +43,26 @@ class TraditionalCFAR():
         # show threshold
         self.show_threshold = True
 
+        # use zero padding 
+        self.use_zero_padding = True
+
     def __call__(self, data, *args):
         """
         Calling the object executes the function 'run'.
         """
         return self.run(data, *args)
+
+    def activate_zero_padding(self):
+        """ 
+        Activates the use of zero padding.
+        """
+        self.use_zero_padding = True
+        
+    def deactivate_zero_padding(self):
+        """ 
+        Deactivates the use of zero padding.
+        """
+        self.use_zero_padding = False
         
     def statistical_measure(self, np_array):
         """
@@ -208,23 +223,26 @@ class TraditionalCFAR():
         """
         # apply zero padding to arrays
         dim = np_array.ndim
-        padding = self.guarding_cells + self.neighbour_cells
-        if dim == 1:
-            tmp = np.zeros(np_array.size+2*padding)
-            tmp[padding:padding+np_array.size] = np_array
-            np_array = tmp
-            del(tmp)
-        elif dim == 2:
-            r_dim, c_dim = np_array.shape
-            tmp = np.zeros((np_array.size+2*padding, np_array.size+2*padding))
-            tmp[padding:padding+r_dim, padding:padding+c_dim] = np_array
-            np_array = tmp
+        if self.use_zero_padding:
+            padding = self.guarding_cells + self.neighbour_cells
+            if dim == 1:
+                tmp = np.zeros(np_array.size+2*padding)
+                tmp[padding:padding+np_array.size] = np_array
+                np_array = tmp
+                del(tmp)
+            elif dim == 2:
+                r_dim, c_dim = np_array.shape
+                tmp = np.zeros((np_array.size+2*padding, np_array.size+2*padding))
+                tmp[padding:padding+r_dim, padding:padding+c_dim] = np_array
+                np_array = tmp
+            else:
+                error = """
+                CFAR alorithm received wrong a np.array of unexpected dimension {}.
+                Expected dimension 1 or 2.
+                """.format(dim)
+                raise ValueError(error)
         else:
-            error = """
-            CFAR alorithm received wrong a np.array of unexpected dimension {}.
-            Expected dimension 1 or 2.
-            """.format(dim)
-            raise ValueError(error)
+            pass
 
         self.input_array = np_array.copy()
         self.results = np.empty(1)

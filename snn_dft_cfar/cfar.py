@@ -44,7 +44,7 @@ class TraditionalCFAR():
         self.show_threshold = True
 
         # use zero padding 
-        self.use_zero_padding = True
+        self.use_zero_padding = False
 
     def __call__(self, data, *args):
         """
@@ -232,7 +232,7 @@ class TraditionalCFAR():
                 del(tmp)
             elif dim == 2:
                 r_dim, c_dim = np_array.shape
-                tmp = np.zeros((np_array.size+2*padding, np_array.size+2*padding))
+                tmp = np.zeros((r_dim+2*padding, c_dim+2*padding))
                 tmp[padding:padding+r_dim, padding:padding+c_dim] = np_array
                 np_array = tmp
             else:

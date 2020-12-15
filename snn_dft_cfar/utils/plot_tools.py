@@ -9,10 +9,10 @@ import numpy as np
 
 def format_plotting():
     # plt.rcParams['figure.figsize'] = (10, 4)
-    plt.rcParams['font.size'] = 16
+    plt.rcParams['font.size'] = 20
     #    plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
-    plt.rcParams['axes.titlesize'] = 1.2 * plt.rcParams['font.size']
+    plt.rcParams['axes.titlesize'] = 1 * plt.rcParams['font.size']
     plt.rcParams['legend.fontsize'] = 0.9 * plt.rcParams['font.size']
     plt.rcParams['xtick.labelsize'] = 0.6 * plt.rcParams['font.size']
     plt.rcParams['ytick.labelsize'] = 0.6 * plt.rcParams['font.size']
@@ -122,8 +122,8 @@ def plot_cfar_1d(cfar_object, show=True):
         low = cfar_object.guarding_cells+cfar_object.neighbour_cells
         high = cfar_object.guarding_cells+cfar_object.neighbour_cells+ \
                 cfar_object.threshold.size
-        ax.plot(range(low,high),cfar_object.threshold, ls='dotted', lw=1,
-                c='C3', label='threshold')
+        # ax.plot(range(low,high),cfar_object.threshold, ls='dotted', lw=1,
+        #         c='C3', label='threshold')
 
     # plot detected peaks
     cntr = 0
@@ -158,7 +158,9 @@ def plot_cfar_1d(cfar_object, show=True):
     
     # show plot
     ax.legend()
-    ax.set_ylabel('signal')
+    ax.set_xlabel("Range (m)")
+    ax.set_yticks([])
+    ax.spines['left'].set_visible(False)
     ax.set_title(cfar_object.name)
     if show:
         ax.grid(True)
@@ -191,14 +193,15 @@ def plot_cfar_2d(cfar_object, show=True):
                 temp:temp+cfar_object.results.shape[1]] = cfar_object.results
     else:
         result = cfar_object.results
-    
+
     # Plot output 2D CFAR
     fig, ax_2 = plt.subplots(figsize=(6,6))
+    format_plotting()
     ax_2.imshow(result, extent=[-v_max, v_max-2*v_min, 0, d_max])
     ax_2.set_aspect("auto")
-    plt.xlabel("Speed frequency (To Do)")
-    plt.ylabel("Range frequency (GHz)")
-    plt.title("OS CFAR")
+    plt.xlabel("Speed (m/s)")
+    plt.ylabel("Range (m)")
+    plt.title("Spiking OS-CFAR")
 
     if show:
         plt.show()

@@ -28,7 +28,7 @@ def print_benchmark_message(fft, fft_to_cfar, cfar_time, cfar_time_per_sample,
     print(80*'=','\n')
 
 def example_1d(chirp, FT, CFAR, guarding_cells, neighbour_cells, 
-               scale_factor, k, t_max, t_min, x_max, x_min):
+               scale_factor, k, zero_padding, t_max, t_min, x_max, x_min):
     """
     Run DFT and CFAR on a one dimensional numpy array
 
@@ -62,11 +62,13 @@ def example_1d(chirp, FT, CFAR, guarding_cells, neighbour_cells,
     # instanciate CFAR dependening on choice
     if CFAR == 'OSCFARSNN':
         cfar = OSCFAR_SNN(scale_factor, guarding_cells, neighbour_cells, k,
-                          t_max, t_min, x_max, x_min)
+                          zero_padding, t_max, t_min, x_max, x_min)
     elif CFAR == 'OSCFAR':
-        cfar = OSCFAR(scale_factor, guarding_cells, neighbour_cells,k)
+        cfar = OSCFAR(scale_factor, guarding_cells, neighbour_cells, k,
+                      zero_padding)
     elif CFAR == 'CACFAR':
-        cfar = CACFAR(scale_factor, guarding_cells, neighbour_cells)
+        cfar = CACFAR(scale_factor, guarding_cells, neighbour_cells,
+                      zero_padding)
     else:
         error = 'Your choice for CFAR ({}) is not valid.'.format(CFAR)
         raise ValueError(error)
@@ -87,7 +89,7 @@ def example_1d(chirp, FT, CFAR, guarding_cells, neighbour_cells,
     plot_cfar(cfar)
 
 def example_2d(data_cube, FT, CFAR, guarding_cells, neighbour_cells, 
-                   scale_factor, k, t_max, t_min, x_max, x_min):
+                   scale_factor, k, zero_padding, t_max, t_min, x_max, x_min):
     """
     Run DFT and CFAR on a two dimensional numpy array
 
@@ -122,11 +124,13 @@ def example_2d(data_cube, FT, CFAR, guarding_cells, neighbour_cells,
     # instanciate CFAR dependening on choice
     if CFAR == 'OSCFARSNN':
         cfar = OSCFAR_SNN(scale_factor,guarding_cells,neighbour_cells,k,
+                          zero_padding,
                           t_max, t_min, x_max, x_min)
     elif CFAR == 'OSCFAR':
-        cfar = OSCFAR(scale_factor,guarding_cells,neighbour_cells,k)
+        cfar = OSCFAR(scale_factor,guarding_cells,neighbour_cells,k,
+                      zero_padding)
     elif CFAR == 'CACFAR':
-        cfar = CACFAR(scale_factor,guarding_cells,neighbour_cells)
+        cfar = CACFAR(scale_factor,guarding_cells,neighbour_cells, zero_padding)
     else:
         error = 'Your choice for CFAR ({}) is not valid.'.format(CFAR)
         raise ValueError(error)
@@ -162,6 +166,8 @@ def main(filename="../data/BBM/scenario1/samples_ch_1_scenario1.txt", dims=1):
     # The latter two behave equivalently but 'OSCFAR' is significantly faster. 
     # Use it for prototyping.
     CFAR = 'OSCFARSNN'
+
+    zero_padding = True
     
     # Run pipeline (DFT+CFAR); currently 2D CFAR is not implented
     if dims == 2:
@@ -177,7 +183,7 @@ def main(filename="../data/BBM/scenario1/samples_ch_1_scenario1.txt", dims=1):
         t_max, t_min, x_max, x_min = 50, 0, 100, 0
 
         example_2d(data_cube,FT,CFAR, guarding_cells, neighbour_cells, 
-                   scale_factor, k, t_max, t_min, x_max, x_min)
+                   scale_factor, k, zero_padding, t_max, t_min, x_max, x_min)
     else:
         chirp_n = 15
 
@@ -192,7 +198,7 @@ def main(filename="../data/BBM/scenario1/samples_ch_1_scenario1.txt", dims=1):
         t_max, t_min, x_max, x_min = 50, 0, 100, 0
 
         example_1d(data_cube[chirp_n],FT,CFAR, guarding_cells, neighbour_cells, 
-                   scale_factor, k, t_max, t_min, x_max, x_min)
+                   scale_factor, k, zero_padding, t_max, t_min, x_max, x_min)
 
 
 if __name__ == "__main__":

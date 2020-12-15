@@ -109,7 +109,7 @@ def plot_cfar_1d(cfar_object, show=True):
     format_plotting()
 
     # plot input data
-    if not cfar_object.use_zero_padding:
+    if not cfar_object.zero_padding:
         ax.plot(cfar_object.input_array, label='signal')
     else:
         tmp_padding = cfar_object.guarding_cells + cfar_object.neighbour_cells
@@ -127,7 +127,7 @@ def plot_cfar_1d(cfar_object, show=True):
 
     # plot detected peaks
     cntr = 0
-    if not cfar_object.use_zero_padding:
+    if not cfar_object.zero_padding:
         for x in np.where(cfar_object.results>=1)[0]:
             if cntr == 0:
                 plt.axvline(x+cfar_object.guarding_cells+ \
@@ -147,7 +147,7 @@ def plot_cfar_1d(cfar_object, show=True):
                 ax.axvline(x, ls='--', c='C1', lw=1)
     
     # plot boundaries where algorithm works properly
-    if not cfar_object.use_zero_padding:
+    if not cfar_object.zero_padding:
         ax.axvline(cfar_object.guarding_cells+cfar_object.neighbour_cells-1,
                     ls='--', c='C2', lw=1, label='algorithm boundaries')
         ax.axvline(cfar_object.results.size+cfar_object.guarding_cells+
@@ -184,7 +184,7 @@ def plot_cfar_2d(cfar_object, show=True):
     v_min = v_max / n_chirps
 
     # Create the CFAR array
-    if not cfar_object.use_zero_padding:
+    if not cfar_object.zero_padding:
         result = np.zeros_like(cfar_object.input_array)
         temp = cfar_object.guarding_cells+cfar_object.neighbour_cells
         result[temp:temp+cfar_object.results.shape[0],

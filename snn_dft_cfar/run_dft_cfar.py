@@ -35,7 +35,7 @@ def run_cfar(dft_data, cfar_args, method="SNN"):
     return cfar
 
 
-def plot(dft, cfar, dims, method):
+def plot(dft, cfar, dims, method, plot_together=True):
     """
     Save figures containing the DFT and the CFAR of the experiment
 
@@ -45,12 +45,24 @@ def plot(dft, cfar, dims, method):
     @param method: Method used for the algorithm, used for generating
     the title of the plot and the file name. {numpy | snn}
     """
-    title = "{} DFT".format(method)
+    if method=="SNN":
+        dft_title = "Spiking DFT"
+        cfar_title = "Spiking OS-CFAR"
+    else:
+        dft_title = "Standard DFT"
+        cfar_title = "Standard OS-CFAR"
     # Obtain plot figures
-    fig_dft = snn_dft_cfar.utils.plot_tools.plot_dft(dft, title, show=False)
-    fig_cfar = snn_dft_cfar.utils.plot_tools.plot_cfar(cfar, show=False)
-    # Save the figures to local files
-    fig_dft.savefig("results/dft{}D_{}.eps".format(dims, method), dpi=150)
-    fig_cfar.savefig("results/cfar{}D_{}.eps".format(dims, method), dpi=150)
+    if not plot_together or dims==1:
+        fig_dft = snn_dft_cfar.utils.plot_tools.plot_dft(dft, dft_title, show=False)
+        fig_cfar = snn_dft_cfar.utils.plot_tools.plot_cfar(cfar, cfar_title, show=False)
+        # Save the figures to local files
+        fig_dft.savefig("results/dft{}D_{}.eps".format(dims, method), dpi=150)
+        fig_cfar.savefig("results/cfar{}D_{}.eps".format(dims, method), dpi=150)
+    else:
+        fig, axes = plt.subplots(ncols=2, figsize=(12, 6))
+        plt.subplots_adjust(wspace=0.05)
+        snn_dft_cfar.utils.plot_tools.plot_dft(dft, dft_title, show=False, ax=axes[0])
+        snn_dft_cfar.utils.plot_tools.plot_cfar(cfar, cfar_title, show=False, ax=axes[1])
+        fig.savefig("results/pipeline{}D_{}.eps".format(dims, method), dpi=150)
     plt.show()
     return

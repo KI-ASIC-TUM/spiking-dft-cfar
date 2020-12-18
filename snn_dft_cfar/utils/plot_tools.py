@@ -38,11 +38,11 @@ def format_plotting():
     plt.gca().yaxis.set_ticks_position('left')
     return
 
-def plot_dft(dft_data, title, show=True):
+def plot_dft(dft_data, title, show=True, ax=None):
     if dft_data.ndim==1:
         fig = plot_1dfft(dft_data, title, show)
     elif dft_data.ndim==2:
-        fig = plot_2dfft(dft_data, title, show)
+        fig = plot_2dfft(dft_data, title, show, ax)
     return fig
 
 def plot_1dfft(dft_data, title="Spiking DFT", show=True):
@@ -65,7 +65,7 @@ def plot_1dfft(dft_data, title="Spiking DFT", show=True):
         plt.show()
     return fig
 
-def plot_2dfft(dft_data, title="Spiking DFT", show=True):
+def plot_2dfft(dft_data, title="Spiking DFT", show=True, ax=None):
     # Radar parameters
     f_s = 77        # [GHz]
     c = 3 * 10**2   # [m/us]
@@ -79,7 +79,10 @@ def plot_2dfft(dft_data, title="Spiking DFT", show=True):
     v_max = wavelength / (4*T_chirp)
     v_min = v_max / n_chirps
 
-    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6, 6))
+    if not ax:
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,6))
+    else:
+        fig = None
     format_plotting()
     ax.imshow(20*np.log10(dft_data), extent=[-v_max, v_max-2*v_min, 0, d_max],)
     ax.set_xlabel("Speed (m/s)")
@@ -88,20 +91,20 @@ def plot_2dfft(dft_data, title="Spiking DFT", show=True):
     ax.set_title(title)
     if show:
         plt.show()
-    return fig
+    return fig, ax
 
 
-def plot_cfar(cfar_object, show=True):
+def plot_cfar(cfar_object, title= "Spiking OS-CFAR", show=True, ax=None):
     """
     Visualize the input and output data.
     """
     if cfar_object.input_array.ndim == 1:
-        fig = plot_cfar_1d(cfar_object, show)
+        fig = plot_cfar_1d(cfar_object, show, title)
     elif cfar_object.input_array.ndim == 2:
-        fig = plot_cfar_2d(cfar_object, show)
+        fig = plot_cfar_2d(cfar_object, show, title, ax=ax)
     return fig
 
-def plot_cfar_1d(cfar_object, show=True):
+def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR"):
     """
     Visualize the 1D input and output data.
     """
@@ -168,7 +171,7 @@ def plot_cfar_1d(cfar_object, show=True):
 
     return fig
 
-def plot_cfar_2d(cfar_object, show=True):
+def plot_cfar_2d(cfar_object, show=True, title="Spiking DFT", ax=None):
     """
     Visualize the 2D input and output data.
     """
@@ -195,15 +198,18 @@ def plot_cfar_2d(cfar_object, show=True):
         result = cfar_object.results
 
     # Plot output 2D CFAR
-    fig, ax_2 = plt.subplots(figsize=(6,6))
+    if not ax:
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,6))
+        plt.ylabel("Range (m)")
+    else:
+        fig = None
+        ax.set_yticks([])
     format_plotting()
-    ax_2.imshow(result, extent=[-v_max, v_max-2*v_min, 0, d_max])
-    ax_2.set_aspect("auto")
+    ax.imshow(result, extent=[-v_max, v_max-2*v_min, 0, d_max])
+    ax.set_aspect("auto")
     plt.xlabel("Speed (m/s)")
-    plt.ylabel("Range (m)")
-    plt.title("Spiking OS-CFAR")
-
+    plt.title(title)
     if show:
         plt.show()
 
-    return fig
+    return fig, ax

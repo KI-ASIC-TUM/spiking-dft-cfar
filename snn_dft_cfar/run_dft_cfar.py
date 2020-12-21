@@ -63,6 +63,6 @@ def plot(dft, cfar, dims, method, plot_together=True):
         plt.subplots_adjust(wspace=0.05)
         snn_dft_cfar.utils.plot_tools.plot_dft(dft, dft_title, show=False, ax=axes[0])
         snn_dft_cfar.utils.plot_tools.plot_cfar(cfar, cfar_title, show=False, ax=axes[1])
-        fig.savefig("results/pipeline{}D_{}.eps".format(dims, method), dpi=150)
+        fig.savefig("results/pipeline{}D_{}.eps".format(dims, method), dpi=50)
     plt.show()
     return

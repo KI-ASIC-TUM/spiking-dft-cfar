@@ -12,10 +12,10 @@ def format_plotting():
     plt.rcParams['font.size'] = 20
     #    plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
-    plt.rcParams['axes.titlesize'] = 1 * plt.rcParams['font.size']
-    plt.rcParams['legend.fontsize'] = 0.9 * plt.rcParams['font.size']
-    plt.rcParams['xtick.labelsize'] = 0.6 * plt.rcParams['font.size']
-    plt.rcParams['ytick.labelsize'] = 0.6 * plt.rcParams['font.size']
+    plt.rcParams['axes.titlesize'] = plt.rcParams['font.size']
+    plt.rcParams['legend.fontsize'] = plt.rcParams['font.size']
+    plt.rcParams['xtick.labelsize'] = 6*plt.rcParams['font.size']
+    plt.rcParams['ytick.labelsize'] = 2*plt.rcParams['font.size']
     # plt.rcParams['savefig.dpi'] = 1000
     plt.rcParams['savefig.format'] = 'eps'
     plt.rcParams['xtick.major.size'] = 3
@@ -52,11 +52,9 @@ def plot_1dfft(dft_data, title="Spiking DFT", show=True):
     S = 6.55        # [GHz/us]
     # Calculate maximum range
     d_max = (f_max*c) / (2*S)
-    
     freq_bins = np.arange(0, d_max, d_max/dft_data.size)[:dft_data.size]
     # Plot results
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14, 5))
-    format_plotting()
     ax.plot(freq_bins, dft_data)
     ax.set_xlabel("Range (m)")
     ax.set_title(title)
@@ -83,14 +81,19 @@ def plot_2dfft(dft_data, title="Spiking DFT", show=True, ax=None):
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,6))
     else:
         fig = None
-    format_plotting()
     ax.imshow(20*np.log10(dft_data), extent=[-v_max, v_max-2*v_min, 0, d_max],)
-    ax.set_xlabel("Speed (m/s)")
-    ax.set_ylabel("Range (m)")
+    format_plotting()
+    ax.set_xlabel("Speed (m/s)", fontsize=20)
+    ax.set_ylabel("Range (m)", fontsize=20)
     ax.set_aspect("auto")
     ax.set_title(title)
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(15)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(15)
     if show:
         plt.show()
+
     return fig, ax
 
 
@@ -164,7 +167,8 @@ def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR"):
     ax.set_xlabel("Range (m)")
     ax.set_yticks([])
     ax.spines['left'].set_visible(False)
-    ax.set_title(cfar_object.name)
+    ax.set_title(title)
+    plt.tight_layout()
     if show:
         ax.grid(True)
         plt.show()
@@ -207,8 +211,12 @@ def plot_cfar_2d(cfar_object, show=True, title="Spiking DFT", ax=None):
     format_plotting()
     ax.imshow(result, extent=[-v_max, v_max-2*v_min, 0, d_max])
     ax.set_aspect("auto")
-    plt.xlabel("Speed (m/s)")
+    plt.xlabel("Speed (m/s)", fontsize=20)
     plt.title(title)
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(15)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(15)
     if show:
         plt.show()
 

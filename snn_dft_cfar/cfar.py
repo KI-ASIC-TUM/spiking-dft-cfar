@@ -17,16 +17,21 @@ class TraditionalCFAR():
     Implementation of the traditional CFAR algorithm. 
     """
 
-    def __init__(self, scale_factor, guarding_cells, neighbour_cells):
+    def __init__(self, scale_factor, guarding_cells, neighbour_cells,
+                 zero_padding):
         """
-        Initialization.
+        Initialization
 
         @param scale_factor: how to scale test_cell before compring with 
-                             statistical measure
-        @param guarding_cells: number of guarding cells (counted from left to 
-                               center)
+         statistical measure
+        @param guarding_cells: number of guarding cells (counted from
+         left to center)
         @param neighbour_cells: number of neighbour cells (as above)
+        @param zero_padding: bool indicating whether to compute CFAR at
+         the borders by enlarging the frame with zeros
         """
+        #TODO: We don't use this variable. Maybe self.__name__ makes 
+        # more sense here
         self.name = 'generic cfar'
         self.processing_time = 0.
 
@@ -41,7 +46,11 @@ class TraditionalCFAR():
         self.threshold = np.empty(1)
         
         # show threshold
+        #TODO: Remove variable if unused
         self.show_threshold = True
+
+        # use zero padding 
+        self.zero_padding = zero_padding
 
     def __call__(self, data, *args):
         """
@@ -95,6 +104,7 @@ class TraditionalCFAR():
         neighbours = np.empty(no_neighbours)
 
         # read out neighbours
+        # TODO: This loop can probably be optimized by using np.where() function
         centre = 0
         for row in range(np_array.shape[0]):
             if row < self.neighbour_cells:
@@ -113,7 +123,6 @@ class TraditionalCFAR():
                 chunk = np_array[row,:]
                 neighbours[centre:centre+chunk.size] = chunk
                 centre += chunk.size
-        
 
         if (centre != no_neighbours):
             error = """
@@ -126,7 +135,6 @@ class TraditionalCFAR():
                               self.neighbour_cells+self.guarding_cells]
         return test_value, neighbours
 
-    
     def cfar_1d(self, np_array):
         """
         Applies the CFAR algorithm to a 1D array with a sliding window
@@ -206,21 +214,39 @@ class TraditionalCFAR():
 
         @param np_array: np.array with ndim == (1 or 2)
         """
+        # apply zero padding to arrays
+        dim = np_array.ndim
+        #TODO: Send zero padding functionality to isolated method
+        if self.zero_padding:
+            padding = self.guarding_cells + self.neighbour_cells
+            if dim == 1:
+                tmp = np.zeros(np_array.size+2*padding)
+                tmp[padding:padding+np_array.size] = np_array
+                np_array = tmp
+                del(tmp)
+            elif dim == 2:
+                r_dim, c_dim = np_array.shape
+                tmp = np.zeros((r_dim+2*padding, c_dim+2*padding))
+                tmp[padding:padding+r_dim, padding:padding+c_dim] = np_array
+                np_array = tmp
+            else:
+                error = """
+                CFAR alorithm received wrong a np.array of unexpected dimension {}.
+                Expected dimension 1 or 2.
+                """.format(dim)
+                raise ValueError(error)
+        else:
+            pass
+
         self.input_array = np_array.copy()
         self.results = np.empty(1)
 
-        dim = np_array.ndim
+        # run CFAR algorithm.
         start = timer()
         if dim == 1:
             self.cfar_1d(np_array)
         elif dim == 2:
             self.cfar_2d(np_array)
-        else:
-            error = """
-            CFAR alorithm received wrong a np.array of unexpected dimension {}.
-            Expected dimension to be 1 or 2.
-            """
-            raise ValueError(error)
         end = timer()
         self.processing_time = end-start
 
@@ -231,7 +257,8 @@ class CACFAR(TraditionalCFAR):
     """
     Cell Averaging CFAR algorithm
     """
-    def __init__(self, scale_factor, guarding_cells, neighbour_cells):
+    def __init__(self, scale_factor, guarding_cells, neighbour_cells,
+                 zero_padding):
         """
         Initialization
 
@@ -240,9 +267,11 @@ class CACFAR(TraditionalCFAR):
         @param guarding_cells: number of guarding cells (counted from left to 
                                center)
         @param neighbour_cells: number of neighbour cells (as above)
+        @param zero_padding: bool indicating whether to compute CFAR at
+         the borders by enlarging the frame with zeros
         """
         super(CACFAR, self).__init__(scale_factor, guarding_cells,
-                                    neighbour_cells)
+                                    neighbour_cells, zero_padding)
         self.name = 'CA-CFAR'
 
     def statistical_measure(self, np_array):
@@ -253,7 +282,8 @@ class OSCFAR(TraditionalCFAR):
     """
     Ordered Statistics CFAR algorithm
     """
-    def __init__(self, scale_factor, guarding_cells, neighbour_cells,k):
+    def __init__(self, scale_factor, guarding_cells, neighbour_cells, k,
+                 zero_padding):
         """
         Initialization
 
@@ -263,9 +293,11 @@ class OSCFAR(TraditionalCFAR):
                                center)
         @param neighbour_cells: number of neighbour cells (as above)
         @param k: k-th largest value to find for statistical measure (int)
+        @param zero_padding: bool indicating whether to compute CFAR at
+         the borders by enlarging the frame with zeros
         """
         super(OSCFAR, self).__init__(scale_factor, guarding_cells,
-                                    neighbour_cells)
+                                    neighbour_cells, zero_padding)
         # OSCFAR needs an integer k for determining the k-th largest value
         self.k = k
         self.name = 'OS-CFAR'
@@ -279,7 +311,7 @@ class OSCFAR_SNN(TraditionalCFAR):
     Ordered Statistics CFAR algorithms.
     """
     def __init__(self, scale_factor, guarding_cells, neighbour_cells,
-                 k, t_max, t_min, x_max, x_min,t_step=0.01):
+                 k, zero_padding, t_max, t_min, x_max, x_min,t_step=0.01):
         """
         Initialization.
 
@@ -289,13 +321,15 @@ class OSCFAR_SNN(TraditionalCFAR):
                                center)
         @param neighbour_cells: number of neighbour cells (as above)
         @param k: k-th largest value to find for statistical measure (int)
+        @param zero_padding: bool indicating whether to compute CFAR at
+         the borders by enlarging the frame with zeros
         @param t_max: largest spike time for simulation
         @param t_min: smallest spike time for simulation
         @param x_max: upper bound for signal values
         @param x_min: lower bound for signal values
         """
         super(OSCFAR_SNN, self).__init__(scale_factor, guarding_cells,
-                                        neighbour_cells)
+                                        neighbour_cells, zero_padding)
         self.name = 'OS-CFAR SNN'
         self.sim_time = 0.
 
@@ -326,6 +360,8 @@ class OSCFAR_SNN(TraditionalCFAR):
         time_encoder = TimeEncoder(t_max=self.t_max,t_min=self.t_min,
                                    x_max=self.x_max,x_min=self.x_min)
 
+        #TODO: Send spike times calculation to isolated function
+        # (and maybe also the weight calculation :) )
         # input spike times
         spike_times = np.zeros(neighbour_values.size+1)
         spike_times[:neighbour_values.size] = neighbour_values[:]

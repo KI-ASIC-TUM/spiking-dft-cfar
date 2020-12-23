@@ -7,14 +7,16 @@
             "scale_factor": 0.2,
             "guarding_cells": 6,
             "neighbour_cells": 15,
-            "k": 6
+            "k": 6,
+            "zero_padding": true
         },
         "2D":
         {
             "scale_factor": 0.2,
             "guarding_cells": 3,
             "neighbour_cells": 4,
-            "k": 8
+            "k": 8,
+            "zero_padding": true
         }
     },
     "encoding_parameters":

@@ -47,7 +47,7 @@ def standard_dft(raw_data, dimensions):
     return result
 
 
-def spiking_dft(raw_data, dimensions, time_step=0.005, adjust=True):
+def spiking_dft(raw_data, dimensions, time_step=0.0005, adjust=True):
     """
     Returns the output of the S-DFT for the given input
 
@@ -79,7 +79,7 @@ def linear_rate_encoding(raw_data, time_step):
     # Normalize all samples between 0 and 1, based on global max and min values
     normalized_cube = raw_operations.normalize(raw_data)
     # Encode the voltage to spikes using rate encoding
-    encoder = encoding.LinearFrequencyEncoder(0.1, 100, 0, 1, 5, time_step,
+    encoder = encoding.LinearFrequencyEncoder(0.1, 2000, 0, 1, 40, time_step,
                                               random_init=True)
     encoded_cube = encoder(normalized_cube)
     return encoded_cube

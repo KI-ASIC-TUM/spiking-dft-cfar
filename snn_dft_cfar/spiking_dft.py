@@ -155,8 +155,8 @@ class FourierTransformSpikingNetwork():
         """
         self.calculate_weights()
         sim_size = int(self.total_time / self.time_step)
-        self.spike_trains_l1 = np.zeros((sim_size, 2*self.n_input, 2*self.n_chirps))
-        self.spike_trains_l2 = np.zeros((sim_size, 2*self.n_input, 4*self.n_chirps))
+        self.spike_trains_l1 = np.zeros((sim_size, 2*self.n_input, 2*self.n_chirps), dtype=bool)
+        self.spike_trains_l2 = np.zeros((sim_size, 2*self.n_input, 4*self.n_chirps), dtype=bool)
         # Simulate the SNN until the simulation time reaches the limit
         for idx in range(sim_size):
             ## Layer 1

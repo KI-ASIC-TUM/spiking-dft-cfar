@@ -46,13 +46,14 @@ def load_config(config_file, dims, method):
     with open(config_file) as f:
         config_data = json.load(f)
     filename = config_data["filename"]
-    # Load the CFAR parameters
+    # Load the general parameters
+    dft_args = {}
     cfar_args = config_data["cfar_args"]["{}D".format(dims)]
     # Append encoding parameteres if an SNN is used
-    encoding_parameters = config_data["encoding_parameters"]
     if method=="SNN":
-        cfar_args.update(encoding_parameters)
-    return (filename, cfar_args)
+        cfar_args.update(config_data["cfar_encoding_parameters"])
+        dft_args = config_data["dft_encoding_parameters"]
+    return (filename, cfar_args, dft_args)
 
 
 def main():
@@ -60,7 +61,7 @@ def main():
     Run the DFT and CFAR on BBM data
     """
     config_file, dims, method = parse_args()
-    filename, cfar_args = load_config(config_file, dims, method)
+    filename, cfar_args, dft_args = load_config(config_file, dims, method)
     # Only the 900 first samples contain information
     data_cube = snn_dft_cfar.utils.read_data.bbm_get_datacube(filename)[:, :900]
     # Run corresponding routine based on the number of dimensions
@@ -69,7 +70,8 @@ def main():
         raw_data = data_cube[chirp_n]
     if dims==2:
         raw_data = data_cube
-    dft, cfar = snn_dft_cfar.run_dft_cfar.dft_cfar(raw_data, dims, cfar_args, method)
+    dft, cfar = snn_dft_cfar.run_dft_cfar.dft_cfar(raw_data, dims, dft_args,
+                                                   cfar_args, method)
     snn_dft_cfar.run_dft_cfar.plot(dft, cfar, dims, method)
     return
 

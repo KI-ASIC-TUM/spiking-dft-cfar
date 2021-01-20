@@ -11,16 +11,17 @@ from snn_dft_cfar.utils import raw_operations
 from snn_dft_cfar.utils import encoding
 
 
-def dft(raw_data, dimensions, method):
+def dft(raw_data, dimensions, dft_args, method):
     """
     Return the DFT of the provided data
 
     @param raw_data: Raw radar sensor data
     @param dimensions: number of dimensions of the input data
+    @param dft_args: parameters of the rate coding for the SNN version
     @param method: "snn" or "numpy"
     """
     if method=="SNN":
-        result = spiking_dft(raw_data, dimensions)
+        result = spiking_dft(raw_data, dimensions, dft_args)
     elif method=="numpy":
         result = standard_dft(raw_data, dimensions)
     return result
@@ -47,7 +48,7 @@ def standard_dft(raw_data, dimensions):
     return result
 
 
-def spiking_dft(raw_data, dimensions, time_step=0.0005, adjust=True):
+def spiking_dft(raw_data, dimensions, coding_params, adjust=True):
     """
     Returns the output of the S-DFT for the given input
 
@@ -60,7 +61,8 @@ def spiking_dft(raw_data, dimensions, time_step=0.0005, adjust=True):
     elif dimensions==2:
         n_chirps, n_samples = raw_data.shape
 
-    encoded_cube = linear_rate_encoding(raw_data, time_step)
+    encoded_cube = linear_rate_encoding(raw_data, coding_params)
+    time_step = coding_params["time_step"]
     # Instantiate the DFT SNN class
     snn = snn_dft_cfar.spiking_dft.FourierTransformSpikingNetwork(
         n_samples, n_chirps, time_step
@@ -72,15 +74,14 @@ def spiking_dft(raw_data, dimensions, time_step=0.0005, adjust=True):
     return output
 
 
-def linear_rate_encoding(raw_data, time_step):
+def linear_rate_encoding(raw_data, coding_params):
     """
     Normalize and encode input data using the LinearFrequencyEncoder
     """
     # Normalize all samples between 0 and 1, based on global max and min values
     normalized_cube = raw_operations.normalize(raw_data)
     # Encode the voltage to spikes using rate encoding
-    encoder = encoding.LinearFrequencyEncoder(0.1, 2000, 0, 1, 40, time_step,
-                                              random_init=True)
+    encoder = encoding.LinearFrequencyEncoder(**coding_params, random_init=True)
     encoded_cube = encoder(normalized_cube)
     return encoded_cube
 

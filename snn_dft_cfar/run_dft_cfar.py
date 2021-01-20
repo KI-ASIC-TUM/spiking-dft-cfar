@@ -14,11 +14,11 @@ import snn_dft_cfar.utils.read_data
 import snn_dft_cfar.utils.plot_tools
 
 
-def dft_cfar(raw_data, dimensions, cfar_args, method="SNN"):
+def dft_cfar(raw_data, dimensions, dft_args, cfar_args, method="SNN"):
     """
     Call the routines for executing the DFT and the OS-CFAR
     """
-    dft = snn_dft_cfar.dft.dft(raw_data, dimensions, method)
+    dft = snn_dft_cfar.dft.dft(raw_data, dimensions, dft_args, method)
     cfar = run_cfar(dft, cfar_args, method)
     return dft, cfar
 

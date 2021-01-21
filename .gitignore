@@ -3,6 +3,7 @@
 
 # Results folder
 examples/results/
+results/
 
 # IPYNB checkpoints in example folder
 examples/.ipynb_checkpoints/

@@ -6,6 +6,7 @@ Library containing 2D-DFT implementations
 import numpy as np
 # Local libraries
 
+
 class FourierTransformSpikingNetwork():
     def __init__(self, n_input, n_chirps, time_step=0.001, total_time=5,
                  normalize=True):

@@ -23,7 +23,7 @@ def parse_args():
                         default=1, metavar="",
                         help="{1 | 2} number of DFT dimensions"
                        )
-    parser.add_argument("-m", "--method", type=str, choices=["numpy", "SNN"],
+    parser.add_argument("-m", "--method", type=str, choices=["numpy", "SNN", "ANN"],
                         default="SNN", metavar="",
                         help="{numpy | SNN} method used for running the system"
                        )
@@ -66,7 +66,7 @@ def main():
     data_cube = snn_dft_cfar.utils.read_data.bbm_get_datacube(filename)[:, :900]
     # Run corresponding routine based on the number of dimensions
     if dims==1:
-        chirp_n = 80
+        chirp_n = 15
         raw_data = data_cube[chirp_n]
     if dims==2:
         raw_data = data_cube

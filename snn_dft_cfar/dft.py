@@ -6,6 +6,7 @@ Main description of the module.
 import matplotlib.pyplot as plt
 import numpy as np
 # Local libraries
+import snn_dft_cfar.ann_dft
 import snn_dft_cfar.spiking_dft
 from snn_dft_cfar.utils import raw_operations
 from snn_dft_cfar.utils import encoding
@@ -22,6 +23,8 @@ def dft(raw_data, dimensions, dft_args, method):
     """
     if method=="SNN":
         result = spiking_dft(raw_data, dimensions, dft_args)
+    elif method=="ANN":
+        result = ann_dft(raw_data, dimensions)
     elif method=="numpy":
         result = standard_dft(raw_data, dimensions)
     return result
@@ -74,6 +77,30 @@ def spiking_dft(raw_data, dimensions, coding_params, adjust=True):
     if adjust:
         output = adjust_snn_dft(output, dimensions)
     return output
+
+
+def  ann_dft(raw_data, dimensions):
+    """
+    Returns the output of the ANN-based DFT for the given input
+
+    @param raw_data: np.array containing the radar sensor raw data
+    @param dimensions: number of dimensions of the DFT
+    """
+    if dimensions==1:
+        n_samples = raw_data.size
+        n_chirps = 1
+    elif dimensions==2:
+        raise(ValueError, "2-dim functionality not implemented")
+    ann = snn_dft_cfar.ann_dft.FourierTransformArtificialNetwork(
+        n_samples, n_chirps
+    )
+
+    output = ann.run(raw_data, dimensions)
+    real = output[:900] - output[900:1800]
+    imag = output[1800:2700] - output[2700:]
+    modulus = np.sqrt(real**2+imag**2)
+    import pdb; pdb.set_trace()
+    return modulus[1:450]
 
 
 def linear_rate_encoding(raw_data, coding_params):

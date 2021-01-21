@@ -27,7 +27,7 @@ def run_cfar(dft_data, cfar_args, method="SNN"):
     """
     Run the corresponding OS-CFAR algorithm on the provided DFT data
     """
-    if method=="numpy":
+    if method=="numpy" or method=="ANN":
         cfar = snn_dft_cfar.cfar.OSCFAR(**cfar_args)
     elif method=="SNN":
         cfar = snn_dft_cfar.cfar.OSCFAR_SNN(**cfar_args)

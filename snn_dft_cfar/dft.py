@@ -62,10 +62,12 @@ def spiking_dft(raw_data, dimensions, coding_params, adjust=True):
         n_chirps, n_samples = raw_data.shape
 
     encoded_cube = linear_rate_encoding(raw_data, coding_params)
+
     time_step = coding_params["time_step"]
+    total_time = coding_params["time_range"]
     # Instantiate the DFT SNN class
     snn = snn_dft_cfar.spiking_dft.FourierTransformSpikingNetwork(
-        n_samples, n_chirps, time_step
+        n_samples, n_chirps, time_step, total_time
     )
 
     output = snn.run(encoded_cube, dimensions)

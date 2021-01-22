@@ -15,7 +15,7 @@
             "scale_factor": 0.2,
             "guarding_cells": 3,
             "neighbour_cells": 4,
-            "k": 8,
+            "k": 9,
             "zero_padding": true
         }
     },

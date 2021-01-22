@@ -99,7 +99,6 @@ def  ann_dft(raw_data, dimensions):
     real = output[:900] - output[900:1800]
     imag = output[1800:2700] - output[2700:]
     modulus = np.sqrt(real**2+imag**2)
-    import pdb; pdb.set_trace()
     return modulus[1:450]
 
 
@@ -147,8 +146,8 @@ def get_complex_comps(spike_sum, dimensions, n_samples, n_chirps=1):
     Calculate the real and imaginary components of each bin
     """
     if dimensions==1:
-        real_total = spike_sum[:n_samples, 0] - spike_sum[:n_samples, 1]
-        imag_total = spike_sum[n_samples:, 0] - spike_sum[n_samples:, 1]
+        real_total = spike_sum[:n_samples, 0] - spike_sum[n_samples:, 0]
+        imag_total = spike_sum[:n_samples, 1] - spike_sum[n_samples:, 1]
 
     if dimensions==2:
         real = spike_sum[:, :n_chirps*2]

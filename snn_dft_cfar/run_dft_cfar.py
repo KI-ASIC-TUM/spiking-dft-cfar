@@ -19,7 +19,7 @@ def dft_cfar(raw_data, dimensions, dft_args, cfar_args, method="SNN",
     """
     Call the routines for executing the DFT and the OS-CFAR
     """
-    fname = "results/{}D-sdft.txt".format(dimensions)
+    fname = "results/{}D-dft.txt".format(dimensions)
     if from_file:
         dft = np.loadtxt(fname)
     else:

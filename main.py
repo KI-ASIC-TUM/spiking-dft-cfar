@@ -80,7 +80,7 @@ def main():
     data_cube = snn_dft_cfar.utils.read_data.bbm_get_datacube(fname)[:, :900]
     # Run corresponding routine based on the number of dimensions
     if dims==1:
-        chirp_n = 15
+        chirp_n = 77
         raw_data = data_cube[chirp_n]
     if dims==2:
         raw_data = data_cube

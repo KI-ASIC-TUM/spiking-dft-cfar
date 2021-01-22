@@ -14,7 +14,7 @@ def format_plotting():
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
     plt.rcParams['axes.titlesize'] = plt.rcParams['font.size']
     plt.rcParams['legend.fontsize'] = plt.rcParams['font.size']
-    plt.rcParams['xtick.labelsize'] = 6*plt.rcParams['font.size']
+    plt.rcParams['xtick.labelsize'] = 16*plt.rcParams['font.size']
     plt.rcParams['ytick.labelsize'] = 2*plt.rcParams['font.size']
     # plt.rcParams['savefig.dpi'] = 1000
     plt.rcParams['savefig.format'] = 'eps'
@@ -164,8 +164,10 @@ def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR"):
     
     # show plot
     ax.legend()
-    ax.set_xlabel("Range (m)")
+    ax.set_xlabel("Range (m)", fontsize=20)
     ax.set_yticks([])
+    ax.set_xticks(np.arange(0, 470, 94))
+    ax.set_xticklabels(np.arange(0,300, 60), fontsize=18)
     ax.spines['left'].set_visible(False)
     ax.set_title(title)
     plt.tight_layout()

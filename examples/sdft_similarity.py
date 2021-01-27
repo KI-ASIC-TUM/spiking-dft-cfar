@@ -27,7 +27,7 @@ def rmse(data_1, data_2):
     print("Root mean square error: {}".format(rmse))
     return rmse
 
-def main(dimensions=1):
+def main(dimensions=2, plot=False):
     """
     Run the S-DFT and FFT and measure their similarity
     """
@@ -41,22 +41,30 @@ def main(dimensions=1):
     }
     fname = "../data/BBM/scenario4/samples_ch_1_scenario4.txt"
     data_cube = snn_dft_cfar.utils.read_data.bbm_get_datacube(fname)[:, :900]
-    chirp_n = 15
-    raw_data = data_cube[chirp_n]
+    if dimensions==1:
+        chirp_n = 15
+        raw_data = data_cube[chirp_n]
+    if dimensions==2:
+        raw_data = data_cube
 
     sdft = snn_dft_cfar.dft.dft(raw_data, dimensions, dft_encoding_parameters,
                                 method="SNN")
     fft = snn_dft_cfar.dft.dft(raw_data, dimensions, dft_args=None,
                                method="numpy")
+    if dimensions==2:
+        fft = fft[:-1, :]
+
+    # Normalize both outputs and calculate the RMSE
     sdft_norm = normalize(sdft)
     fft_norm = normalize(fft)
     rmse(sdft_norm, fft_norm)
 
-    plt.subplot(2, 1, 1)
-    plt.plot(sdft_norm)
-    plt.subplot(2, 1, 2)
-    plt.plot(fft_norm)
-    plt.show()
+    if plot:
+        plt.subplot(2, 1, 1)
+        plt.plot(sdft_norm)
+        plt.subplot(2, 1, 2)
+        plt.plot(fft_norm)
+        plt.show()
 
 
 if __name__ == "__main__":

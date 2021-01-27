@@ -24,8 +24,8 @@ def dft_cfar(raw_data, dimensions, dft_args, cfar_args, method="SNN",
     """
     Call the routines for executing the DFT and the OS-CFAR
     """
-    results_path = pathlib.Path(__file__).resolve().parent.parent.joinpath("results")
-    fname = "{}/{}D-dft.txt".format(results_path, dimensions)
+    rpath = pathlib.Path(__file__).resolve().parent.parent.joinpath("results")
+    fname = "{}/{}D-dft.txt".format(rpath, dimensions)
     if from_file:
         dft = np.loadtxt(fname)
     else:
@@ -76,16 +76,23 @@ def plot(dft, cfar, dims, method, plot_together=True):
     results_path = pathlib.Path(__file__).parent.parent.joinpath("results")
     logger.info("Saving plots in {}".format(results_path))
     if not plot_together or dims==1:
-        fig_dft = snn_dft_cfar.utils.plot_tools.plot_dft(dft, dft_title, show=False)
-        fig_cfar = snn_dft_cfar.utils.plot_tools.plot_cfar(cfar, cfar_title, show=False)
+        fig_dft = snn_dft_cfar.utils.plot_tools.plot_dft(dft, dft_title,
+                                                         show=False)
+        fig_cfar = snn_dft_cfar.utils.plot_tools.plot_cfar(cfar, cfar_title,
+                                                           show=False)
         # Save the figures to local files
-        fig_dft.savefig("{}/dft{}D_{}.eps".format(results_path,dims, method), dpi=150)
-        fig_cfar.savefig("{}/cfar{}D_{}.eps".format(results_path, dims, method), dpi=150)
+        fig_dft.savefig("{}/dft{}D_{}.eps".format(results_path,dims, method),
+                        dpi=150)
+        fig_cfar.savefig("{}/cfar{}D_{}.eps".format(results_path, dims, method),
+                         dpi=150)
     else:
         fig, axes = plt.subplots(ncols=2, figsize=(12, 6))
         plt.subplots_adjust(wspace=0.05)
-        snn_dft_cfar.utils.plot_tools.plot_dft(dft, dft_title, show=False, ax=axes[0])
-        snn_dft_cfar.utils.plot_tools.plot_cfar(cfar, cfar_title, show=False, ax=axes[1])
-        fig.savefig("{}/pipeline{}D_{}.eps".format(results_path, dims, method), dpi=50)
+        snn_dft_cfar.utils.plot_tools.plot_dft(dft, dft_title, show=False,
+                                               ax=axes[0])
+        snn_dft_cfar.utils.plot_tools.plot_cfar(cfar, cfar_title, show=False,
+                                                ax=axes[1])
+        fig.savefig("{}/pipeline{}D_{}.eps".format(results_path, dims, method),
+                                                   dpi=50)
     plt.show()
     return

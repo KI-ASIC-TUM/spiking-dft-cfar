@@ -175,38 +175,28 @@ class FourierTransformSpikingNetwork():
         self.spike_trains_l2 = np.zeros(
             (sim_size, 2*self.n_input, 4*self.n_chirps), dtype=bool
         )
+        t_1, t_2, t_3, t_4, t_5 = 5*[0]
         # Simulate the SNN until the simulation time reaches the limit
         for idx in range(sim_size):
             ## Layer 1
             # Update presence of input spikes
-            if idx==0:
-                t_1 = time.time()
+            t_1 += time.time()
             input_spikes = spike_trains[:, :, idx]
             # Update input current
             z_re, z_im = self.update_input_currents(input_spikes, self.weights[0])
             z = np.hstack((z_re, z_im))
-            if idx==0:
-                t_2 = time.time()
+            t_2 += time.time()
 
             # Update spike generation
             self.generate_spikes(z, layer=0)
-            if idx==0:
-                t_3 = time.time()
-
+            t_3 += time.time()
             self.spike_trains_l1[idx] = self.spikes
-            if idx==0:
-                t_4 = time.time()
+            t_4 += time.time()
 
             # Update membrane potential
             self.update_membrane_potential(z, layer=0)
-            if idx==0:
-                t_5 = time.time()
+            t_5 += time.time()
 
-            if idx==0:
-                logger.debug("Update currents time: {:.5f}".format(t_2-t_1))
-                logger.debug("Generate spikes time: {:.5f}".format(t_3-t_2))
-                logger.debug("Spike assignment time: {:.5f}".format(t_4-t_3))
-                logger.debug("Update membrane potential time: {:.5f}".format(t_5-t_4))
             if layers==1:
                 self.sim_time += self.time_step
                 continue
@@ -223,6 +213,10 @@ class FourierTransformSpikingNetwork():
 
             # Increase current simulation time
             self.sim_time += self.time_step
+        logger.debug("Update currents time: {:.5f}".format((t_2-t_1)/sim_size))
+        logger.debug("Generate spikes time: {:.5f}".format((t_3-t_2)/sim_size))
+        logger.debug("Spike assignment time: {:.5f}".format((t_4-t_3)/sim_size))
+        logger.debug("Update potential time: {:.5f}".format((t_5-t_4)/sim_size))
         if layers==1:
             return self.spike_trains_l1
         return self.spike_trains_l2

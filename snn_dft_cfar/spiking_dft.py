@@ -3,8 +3,12 @@
 Library containing 2D-DFT implementations
 """
 # Standard libraries
+import logging
 import numpy as np
+import time
 # Local libraries
+
+logger = logging.getLogger('S-DFT S-CFAR')
 
 
 class FourierTransformSpikingNetwork():
@@ -122,13 +126,21 @@ class FourierTransformSpikingNetwork():
         """
         Calculate the total current that circulates inside each neuron
         """
+        t_0 = time.time()
         z_real = np.dot(weights[0], input_spikes.transpose())
         z_imag = np.dot(weights[1], input_spikes.transpose())
+        t_1 = time.time()
         # Add bias to the result and multiply by threshold voltage
         z_real += self.bias
         z_imag += self.bias
+        t_2 = time.time()
         z_real *= 100*self.v_threshold
         z_imag *= 100*self.v_threshold
+        t_3 = time.time()
+        if self.sim_time==0:
+            logger.debug("Dot product time: {:.5f}".format(t_1-t_0))
+            logger.debug("Add bias time: {:.5f}".format(t_2-t_1))
+            logger.debug("Multiply threshold time: {:.5f}".format(t_3-t_2))
         return (z_real, z_imag)
 
     def generate_spikes(self, z, layer):
@@ -157,22 +169,46 @@ class FourierTransformSpikingNetwork():
         """
         self.calculate_weights()
         sim_size = int(self.total_time / self.time_step)
-        self.spike_trains_l1 = np.zeros((sim_size, 2*self.n_input, 2*self.n_chirps), dtype=bool)
-        self.spike_trains_l2 = np.zeros((sim_size, 2*self.n_input, 4*self.n_chirps), dtype=bool)
+        self.spike_trains_l1 = np.zeros(
+            (sim_size, 2*self.n_input, 2*self.n_chirps), dtype=bool
+        )
+        self.spike_trains_l2 = np.zeros(
+            (sim_size, 2*self.n_input, 4*self.n_chirps), dtype=bool
+        )
         # Simulate the SNN until the simulation time reaches the limit
         for idx in range(sim_size):
             ## Layer 1
             # Update presence of input spikes
+            if idx==0:
+                t_1 = time.time()
             input_spikes = spike_trains[:, :, idx]
             # Update input current
             z_re, z_im = self.update_input_currents(input_spikes, self.weights[0])
             z = np.hstack((z_re, z_im))
+            if idx==0:
+                t_2 = time.time()
+
             # Update spike generation
             self.generate_spikes(z, layer=0)
+            if idx==0:
+                t_3 = time.time()
+
             self.spike_trains_l1[idx] = self.spikes
+            if idx==0:
+                t_4 = time.time()
+
             # Update membrane potential
             self.update_membrane_potential(z, layer=0)
+            if idx==0:
+                t_5 = time.time()
+
+            if idx==0:
+                logger.debug("Update currents time: {:.5f}".format(t_2-t_1))
+                logger.debug("Generate spikes time: {:.5f}".format(t_3-t_2))
+                logger.debug("Spike assignment time: {:.5f}".format(t_4-t_3))
+                logger.debug("Update membrane potential time: {:.5f}".format(t_5-t_4))
             if layers==1:
+                self.sim_time += self.time_step
                 continue
 
             ## Layer 2

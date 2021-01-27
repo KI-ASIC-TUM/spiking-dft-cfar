@@ -5,11 +5,15 @@ Main description of the module.
 # Standard libraries
 import matplotlib.pyplot as plt
 import numpy as np
+import logging
+import time
 # Local libraries
 import snn_dft_cfar.ann_dft
 import snn_dft_cfar.spiking_dft
 from snn_dft_cfar.utils import raw_operations
 from snn_dft_cfar.utils import encoding
+
+logger = logging.getLogger('S-DFT S-CFAR')
 
 
 def dft(raw_data, dimensions, dft_args, method):
@@ -64,7 +68,10 @@ def spiking_dft(raw_data, dimensions, coding_params, adjust=True):
     elif dimensions==2:
         n_chirps, n_samples = raw_data.shape
 
+    t1 = time.time()
     encoded_cube = linear_rate_encoding(raw_data, coding_params)
+    t2 = time.time()
+    logger.debug("Encoding time: {:.5f}".format(t2-t1))
 
     time_step = coding_params["time_step"]
     total_time = coding_params["time_range"]
@@ -72,10 +79,15 @@ def spiking_dft(raw_data, dimensions, coding_params, adjust=True):
     snn = snn_dft_cfar.spiking_dft.FourierTransformSpikingNetwork(
         n_samples, n_chirps, time_step, total_time
     )
-
+    t3 = time.time()
+    logger.debug("SNN insantiation time: {:.5f}".format(t3-t2))
     output = snn.run(encoded_cube, dimensions)
+    t4 = time.time()
+    logger.debug("SNN run time: {:.5f}".format(t4-t3))
     if adjust:
         output = adjust_snn_dft(output, dimensions)
+    t5 = time.time()
+    logger.debug("SNN insantiation time: {:.5f}".format(t5-t4))
     return output
 
 

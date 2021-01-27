@@ -5,6 +5,9 @@ Main file for running the spiking_dft_cfar library
 # Standard libraries
 import argparse
 import json
+import logging
+import pathlib
+import time
 # Local libraries
 import snn_dft_cfar.run_dft_cfar
 
@@ -60,6 +63,7 @@ def load_config(conf_file, dims, method):
     with open(conf_file) as f:
         config_data = json.load(f)
     fname = config_data["filename"]
+    fpath = pathlib.Path(__file__).resolve().parent.joinpath(fname)
     # Load the general parameters
     dft_args = {}
     cfar_args = config_data["cfar_args"]["{}D".format(dims)]
@@ -67,17 +71,43 @@ def load_config(conf_file, dims, method):
     if method=="SNN":
         cfar_args.update(config_data["cfar_encoding_parameters"])
         dft_args = config_data["dft_encoding_parameters"]
-    return (fname, cfar_args, dft_args)
+    return (fpath, cfar_args, dft_args)
 
 
-def main():
+def conf_logger():
+    # Create log folder
+    logpath = pathlib.Path(__file__).resolve().parent.joinpath("log")
+    pathlib.Path(logpath).mkdir(parents=True, exist_ok=True)
+    datetime = time.strftime("%Y-%m-%d %H:%M:%S")
+    fdatetime = time.strftime("%Y%m%d-%H%M%S")
+    # Create logger
+    logger = logging.getLogger('S-DFT S-CFAR')
+    logger.setLevel(logging.DEBUG)
+
+    # Create file handler
+    file_handler = logging.FileHandler("{}/{}.log".format(logpath, fdatetime))
+    file_handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s',
+                                  "%H:%M:%S")
+    file_handler.setFormatter(formatter)
+    file_handler.stream.write("{} MAIN PROGRAM EXECUTION\n".format(datetime))
+    logger.addHandler(file_handler)
+
+    # Create console handler
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(levelname)s: %(message)s')
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
+    return logger
+
+
+def run(fpath, dims, dft_args, cfar_args, method, from_file):
     """
-    Run the DFT and CFAR on BBM data
+    Run the algorithm with the loaded configuration
     """
-    conf_file, dims, method, from_file = parse_args()
-    fname, cfar_args, dft_args = load_config(conf_file, dims, method)
     # Only the 900 first samples contain information
-    data_cube = snn_dft_cfar.utils.read_data.bbm_get_datacube(fname)[:, :900]
+    data_cube = snn_dft_cfar.utils.read_data.bbm_get_datacube(fpath)[:, :900]
     # Run corresponding routine based on the number of dimensions
     if dims==1:
         chirp_n = 77
@@ -87,6 +117,24 @@ def main():
     dft, cfar = snn_dft_cfar.run_dft_cfar.dft_cfar(raw_data, dims, dft_args,
                                                    cfar_args, method, from_file)
     snn_dft_cfar.run_dft_cfar.plot(dft, cfar, dims, method)
+    return
+
+
+def main():
+    """
+    Run the DFT and CFAR on BBM data
+    """
+    conf_file, dims, method, from_file = parse_args()
+    fpath, cfar_args, dft_args = load_config(conf_file, dims, method)
+    logger = conf_logger()
+
+    init_message = "Running spiking-dft-cfar program:"
+    init_message +="\n- Configuration file: {}".format(conf_file)
+    init_message +="\n- Number of dimensions: {}".format(dims)
+    init_message +="\n- Method: {}".format(method)
+    logger.info(init_message)
+
+    run(fpath, dims, dft_args, cfar_args, method, from_file)
     return
 
 

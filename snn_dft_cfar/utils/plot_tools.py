@@ -163,7 +163,7 @@ def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR"):
         pass
     
     # show plot
-    ax.legend()
+    ax.legend(framealpha=1)
     ax.set_xlabel("Range (m)", fontsize=20)
     ax.set_yticks([])
     ax.set_xticks(np.arange(0, 470, 94))

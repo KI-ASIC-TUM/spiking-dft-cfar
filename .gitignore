@@ -9,6 +9,7 @@ results/
 examples/.ipynb_checkpoints/
 
 # Experiment results and datasets
+log
 **.csv
 **.eps
 **.png

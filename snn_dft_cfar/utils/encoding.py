@@ -82,7 +82,7 @@ class LinearFrequencyEncoder(Encoder):
         cols = value.shape[1]
         periods, init_spikes = self.get_spike_params(value)
         timesteps = int(self.time_range / self.time_step)
-        self.spike_trains = np.zeros((rows, cols, timesteps))
+        self.spike_trains = np.zeros((rows, cols, timesteps), dtype=bool)
         for row, col in np.ndindex((rows, cols)):
             period = periods[row, col]
             init_spike = init_spikes[row, col]

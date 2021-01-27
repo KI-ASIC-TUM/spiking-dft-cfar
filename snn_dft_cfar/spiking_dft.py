@@ -6,8 +6,10 @@ Library containing 2D-DFT implementations
 import numpy as np
 # Local libraries
 
+
 class FourierTransformSpikingNetwork():
-    def __init__(self, n_input, n_chirps, time_step=0.001, normalize=True):
+    def __init__(self, n_input, n_chirps, time_step=0.001, total_time=5,
+                 normalize=True):
         self.n_input = n_input
         self.n_chirps = n_chirps
         self.normalize = normalize
@@ -28,7 +30,7 @@ class FourierTransformSpikingNetwork():
         # SNN simulation parameters
         self.time_step = time_step
         self.sim_time = 0
-        self.total_time = 5
+        self.total_time = total_time
 
     def calculate_weights(self):
         self.weights = []
@@ -125,8 +127,8 @@ class FourierTransformSpikingNetwork():
         # Add bias to the result and multiply by threshold voltage
         z_real += self.bias
         z_imag += self.bias
-        z_real *= self.v_threshold
-        z_imag *= self.v_threshold
+        z_real *= 100*self.v_threshold
+        z_imag *= 100*self.v_threshold
         return (z_real, z_imag)
 
     def generate_spikes(self, z, layer):
@@ -155,8 +157,8 @@ class FourierTransformSpikingNetwork():
         """
         self.calculate_weights()
         sim_size = int(self.total_time / self.time_step)
-        self.spike_trains_l1 = np.zeros((sim_size, 2*self.n_input, 2*self.n_chirps))
-        self.spike_trains_l2 = np.zeros((sim_size, 2*self.n_input, 4*self.n_chirps))
+        self.spike_trains_l1 = np.zeros((sim_size, 2*self.n_input, 2*self.n_chirps), dtype=bool)
+        self.spike_trains_l2 = np.zeros((sim_size, 2*self.n_input, 4*self.n_chirps), dtype=bool)
         # Simulate the SNN until the simulation time reaches the limit
         for idx in range(sim_size):
             ## Layer 1

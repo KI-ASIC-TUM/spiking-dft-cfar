@@ -43,13 +43,18 @@ def parse_args():
                         nargs='?', const=True, metavar="",
                         help="Get the S-DFT data from a local file"
                        )
+    parser.add_argument("-s", type=str2bool, default=False,
+                        nargs='?', const=True, metavar="",
+                        help="Show the plot after the simulation"
+                       )
     # Get the values from the argument list
     args = parser.parse_args()
     config_file = args.config_file
     dimensions = args.dimensions
     method = args.method
     from_file = args.f
-    return (config_file, dimensions, method, from_file)
+    show_plot = args.s
+    return (config_file, dimensions, method, from_file, show_plot)
 
 
 def load_config(conf_file, dims, method):
@@ -102,7 +107,7 @@ def conf_logger():
     return logger
 
 
-def run(fpath, dims, dft_args, cfar_args, method, from_file):
+def run(fpath, dims, dft_args, cfar_args, method, from_file, show_plot):
     """
     Run the algorithm with the loaded configuration
     """
@@ -116,7 +121,7 @@ def run(fpath, dims, dft_args, cfar_args, method, from_file):
         raw_data = data_cube
     dft, cfar = snn_dft_cfar.run_dft_cfar.dft_cfar(raw_data, dims, dft_args,
                                                    cfar_args, method, from_file)
-    snn_dft_cfar.run_dft_cfar.plot(dft, cfar, dims, method)
+    snn_dft_cfar.run_dft_cfar.plot(dft, cfar, dims, method, show=show_plot)
     return
 
 
@@ -124,7 +129,7 @@ def main():
     """
     Run the DFT and CFAR on BBM data
     """
-    conf_file, dims, method, from_file = parse_args()
+    conf_file, dims, method, from_file, show_plot = parse_args()
     fpath, cfar_args, dft_args = load_config(conf_file, dims, method)
     logger = conf_logger()
 
@@ -134,7 +139,7 @@ def main():
     init_message +="\n- Method: {}".format(method)
     logger.info(init_message)
 
-    run(fpath, dims, dft_args, cfar_args, method, from_file)
+    run(fpath, dims, dft_args, cfar_args, method, from_file, show_plot)
     return
 
 

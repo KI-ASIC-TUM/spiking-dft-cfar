@@ -56,7 +56,7 @@ def run_cfar(dft_data, cfar_args, method="SNN"):
     return cfar
 
 
-def plot(dft, cfar, dims, method, plot_together=True):
+def plot(dft, cfar, dims, method, plot_together=True, show=True):
     """
     Save figures containing the DFT and the CFAR of the experiment
 
@@ -65,6 +65,9 @@ def plot(dft, cfar, dims, method, plot_together=True):
     @param dims: Number of dimensions. Used for generating the file name
     @param method: Method used for the algorithm, used for generating
     the title of the plot and the file name. {numpy | snn}
+    @param plot_together: In the case of a 2D simulation, generate the
+    DFT and CFAR plots in a single figure
+    @param show: Show the resulting plots from the simulation
     """
     if method=="SNN":
         dft_title = "Spiking DFT"
@@ -94,5 +97,6 @@ def plot(dft, cfar, dims, method, plot_together=True):
                                                 ax=axes[1])
         fig.savefig("{}/pipeline{}D_{}.eps".format(results_path, dims, method),
                                                    dpi=50)
-    plt.show()
+    if show:
+        plt.show()
     return

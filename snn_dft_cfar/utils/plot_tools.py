@@ -92,6 +92,7 @@ def plot_2dfft(dft_data, title="Spiking DFT", show=True, ax=None):
     ax.set_ylabel("Range (m)", fontsize=20)
     ax.set_aspect("auto")
     ax.set_title(title)
+    plt.tight_layout()
     for tick in ax.xaxis.get_major_ticks():
         tick.label.set_fontsize(15)
     for tick in ax.yaxis.get_major_ticks():

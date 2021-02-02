@@ -107,7 +107,7 @@ def conf_logger():
     return logger
 
 
-def run(fpath, dims, dft_args, cfar_args, method, from_file, show_plot):
+def run(fpath, dims, dft_args, cfar_args, method, from_file, show_plot, fmt):
     """
     Run the algorithm with the loaded configuration
     """
@@ -121,7 +121,8 @@ def run(fpath, dims, dft_args, cfar_args, method, from_file, show_plot):
         raw_data = data_cube
     dft, cfar = snn_dft_cfar.run_dft_cfar.dft_cfar(raw_data, dims, dft_args,
                                                    cfar_args, method, from_file)
-    snn_dft_cfar.run_dft_cfar.plot(dft, cfar, dims, method, show=show_plot)
+    snn_dft_cfar.run_dft_cfar.plot(dft, cfar, dims, method, show=show_plot,
+                                   fmt=fmt)
     return
 
 
@@ -129,6 +130,7 @@ def main():
     """
     Run the DFT and CFAR on BBM data
     """
+    fmt = "pdf"
     conf_file, dims, method, from_file, show_plot = parse_args()
     fpath, cfar_args, dft_args = load_config(conf_file, dims, method)
     logger = conf_logger()
@@ -139,7 +141,7 @@ def main():
     init_message +="\n- Method: {}".format(method)
     logger.info(init_message)
 
-    run(fpath, dims, dft_args, cfar_args, method, from_file, show_plot)
+    run(fpath, dims, dft_args, cfar_args, method, from_file, show_plot, fmt)
     return
 
 

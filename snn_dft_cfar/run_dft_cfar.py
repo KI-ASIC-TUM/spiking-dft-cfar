@@ -56,7 +56,7 @@ def run_cfar(dft_data, cfar_args, method="SNN"):
     return cfar
 
 
-def plot(dft, cfar, dims, method, plot_together=True, show=True):
+def plot(dft, cfar, dims, method, plot_together=True, show=True, fmt="pdf"):
     """
     Save figures containing the DFT and the CFAR of the experiment
 
@@ -84,10 +84,10 @@ def plot(dft, cfar, dims, method, plot_together=True, show=True):
         fig_cfar = snn_dft_cfar.utils.plot_tools.plot_cfar(cfar, cfar_title,
                                                            show=False)
         # Save the figures to local files
-        fig_dft.savefig("{}/dft{}D_{}.eps".format(results_path,dims, method),
-                        dpi=150)
-        fig_cfar.savefig("{}/cfar{}D_{}.eps".format(results_path, dims, method),
-                         dpi=150)
+        fig_dft.savefig("{}/dft{}D_{}.{}".format(
+                results_path,dims, method, fmt), dpi=150)
+        fig_cfar.savefig("{}/cfar{}D_{}.{}".format(
+                results_path, dims, method, fmt), dpi=150)
     else:
         fig, axes = plt.subplots(ncols=2, figsize=(12, 6))
         plt.subplots_adjust(wspace=0.05)
@@ -95,8 +95,8 @@ def plot(dft, cfar, dims, method, plot_together=True, show=True):
                                                ax=axes[0])
         snn_dft_cfar.utils.plot_tools.plot_cfar(cfar, cfar_title, show=False,
                                                 ax=axes[1])
-        fig.savefig("{}/pipeline{}D_{}.eps".format(results_path, dims, method),
-                                                   dpi=50)
+        fig.savefig("{}/pipeline{}D_{}.{}".format(
+                results_path, dims, method, fmt), dpi=50)
     if show:
         plt.show()
     return

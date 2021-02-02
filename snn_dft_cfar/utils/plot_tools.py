@@ -55,8 +55,13 @@ def plot_1dfft(dft_data, title="Spiking DFT", show=True):
     freq_bins = np.arange(0, d_max, d_max/dft_data.size)[:dft_data.size]
     # Plot results
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14, 5))
+    format_plotting()
     ax.plot(freq_bins, dft_data)
-    ax.set_xlabel("Range (m)")
+    ax.set_xlabel("Range (m)", fontsize=20)
+    ax.set_yticks([])
+    ax.set_xticks(np.arange(0, 300, 60))
+    ax.set_xticklabels(np.arange(0,300, 60), fontsize=18)
+    ax.spines['left'].set_visible(False)
     ax.set_title(title)
     plt.tight_layout()
     if show:

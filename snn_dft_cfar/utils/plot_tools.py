@@ -40,10 +40,10 @@ def format_plotting():
 
 def plot_dft(dft_data, title, show=True, ax=None):
     if dft_data.ndim==1:
-        fig = plot_1dfft(dft_data, title, show)
+        fig, ax = plot_1dfft(dft_data, title, show)
     elif dft_data.ndim==2:
-        fig = plot_2dfft(dft_data, title, show, ax)
-    return fig
+        fig, ax = plot_2dfft(dft_data, title, show, ax)
+    return (fig, ax)
 
 def plot_1dfft(dft_data, title="Spiking DFT", show=True):
     # Radar parameters
@@ -66,7 +66,7 @@ def plot_1dfft(dft_data, title="Spiking DFT", show=True):
     plt.tight_layout()
     if show:
         plt.show()
-    return fig
+    return (fig, ax)
 
 def plot_2dfft(dft_data, title="Spiking DFT", show=True, ax=None):
     # Radar parameters
@@ -108,10 +108,10 @@ def plot_cfar(cfar_object, title= "Spiking OS-CFAR", show=True, ax=None):
     Visualize the input and output data.
     """
     if cfar_object.input_array.ndim == 1:
-        fig = plot_cfar_1d(cfar_object, show, title)
+        fig, ax = plot_cfar_1d(cfar_object, show, title)
     elif cfar_object.input_array.ndim == 2:
-        fig = plot_cfar_2d(cfar_object, show, title, ax=ax)
-    return fig
+        fig, ax = plot_cfar_2d(cfar_object, show, title, ax=ax)
+    return (fig, ax)
 
 def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR"):
     """
@@ -181,7 +181,7 @@ def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR"):
         ax.grid(True)
         plt.show()
 
-    return fig
+    return (fig, ax)
 
 def plot_cfar_2d(cfar_object, show=True, title="Spiking DFT", ax=None):
     """

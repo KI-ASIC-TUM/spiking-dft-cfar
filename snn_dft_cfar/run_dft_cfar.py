@@ -82,9 +82,9 @@ def plot(dft, cfar, dims, method, plot_together=True, show=True, fmt="pdf"):
     logger.info("Saving plots in {}".format(results_path))
     if not plot_together or dims==1:
         fig_dft, ax1 = snn_dft_cfar.utils.plot_tools.plot_dft(dft, dft_title,
-                                                         show=False)
+                                                              show=False)
         fig_cfar, ax2 = snn_dft_cfar.utils.plot_tools.plot_cfar(cfar, cfar_title,
-                                                           show=False)
+                                                                show=False)
         # Save the figures to local files
         fig_dft.savefig("{}/dft{}D_{}.{}".format(
                 results_path,dims, method, fmt), dpi=150)
@@ -98,7 +98,7 @@ def plot(dft, cfar, dims, method, plot_together=True, show=True, fmt="pdf"):
         snn_dft_cfar.utils.plot_tools.plot_cfar(cfar, cfar_title, show=False,
                                                 ax=axes[1])
         fig.savefig("{}/pipeline{}D_{}.{}".format(
-                results_path, dims, method, fmt), dpi=50)
+                    results_path, dims, method, fmt), dpi=50)
     if show:
         plt.show()
     return

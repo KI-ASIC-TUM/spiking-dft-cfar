@@ -40,10 +40,10 @@ def format_plotting():
 
 def plot_dft(dft_data, title, show=True, ax=None):
     if dft_data.ndim==1:
-        fig = plot_1dfft(dft_data, title, show)
+        fig, ax = plot_1dfft(dft_data, title, show)
     elif dft_data.ndim==2:
-        fig = plot_2dfft(dft_data, title, show, ax)
-    return fig
+        fig, ax = plot_2dfft(dft_data, title, show, ax)
+    return (fig, ax)
 
 def plot_1dfft(dft_data, title="Spiking DFT", show=True):
     # Radar parameters
@@ -55,13 +55,18 @@ def plot_1dfft(dft_data, title="Spiking DFT", show=True):
     freq_bins = np.arange(0, d_max, d_max/dft_data.size)[:dft_data.size]
     # Plot results
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14, 5))
+    format_plotting()
     ax.plot(freq_bins, dft_data)
-    ax.set_xlabel("Range (m)")
+    ax.set_xlabel("Range (m)", fontsize=20)
+    ax.set_yticks([])
+    ax.set_xticks(np.arange(0, 300, 60))
+    ax.set_xticklabels(np.arange(0,300, 60), fontsize=18)
+    ax.spines['left'].set_visible(False)
     ax.set_title(title)
     plt.tight_layout()
     if show:
         plt.show()
-    return fig
+    return (fig, ax)
 
 def plot_2dfft(dft_data, title="Spiking DFT", show=True, ax=None):
     # Radar parameters
@@ -87,6 +92,7 @@ def plot_2dfft(dft_data, title="Spiking DFT", show=True, ax=None):
     ax.set_ylabel("Range (m)", fontsize=20)
     ax.set_aspect("auto")
     ax.set_title(title)
+    plt.tight_layout()
     for tick in ax.xaxis.get_major_ticks():
         tick.label.set_fontsize(15)
     for tick in ax.yaxis.get_major_ticks():
@@ -102,10 +108,10 @@ def plot_cfar(cfar_object, title= "Spiking OS-CFAR", show=True, ax=None):
     Visualize the input and output data.
     """
     if cfar_object.input_array.ndim == 1:
-        fig = plot_cfar_1d(cfar_object, show, title)
+        fig, ax = plot_cfar_1d(cfar_object, show, title)
     elif cfar_object.input_array.ndim == 2:
-        fig = plot_cfar_2d(cfar_object, show, title, ax=ax)
-    return fig
+        fig, ax = plot_cfar_2d(cfar_object, show, title, ax=ax)
+    return (fig, ax)
 
 def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR"):
     """
@@ -163,7 +169,7 @@ def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR"):
         pass
     
     # show plot
-    ax.legend()
+    ax.legend(framealpha=1)
     ax.set_xlabel("Range (m)", fontsize=20)
     ax.set_yticks([])
     ax.set_xticks(np.arange(0, 470, 94))
@@ -175,7 +181,7 @@ def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR"):
         ax.grid(True)
         plt.show()
 
-    return fig
+    return (fig, ax)
 
 def plot_cfar_2d(cfar_object, show=True, title="Spiking DFT", ax=None):
     """

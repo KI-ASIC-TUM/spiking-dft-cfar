@@ -14,8 +14,8 @@ def format_plotting():
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
     plt.rcParams['axes.titlesize'] = plt.rcParams['font.size']
     plt.rcParams['legend.fontsize'] = plt.rcParams['font.size']
-    plt.rcParams['xtick.labelsize'] = 16*plt.rcParams['font.size']
-    plt.rcParams['ytick.labelsize'] = 2*plt.rcParams['font.size']
+    plt.rcParams['xtick.labelsize'] = plt.rcParams['font.size']
+    plt.rcParams['ytick.labelsize'] = plt.rcParams['font.size']
     # plt.rcParams['savefig.dpi'] = 1000
     plt.rcParams['savefig.format'] = 'eps'
     plt.rcParams['xtick.major.size'] = 3
@@ -38,29 +38,52 @@ def format_plotting():
     plt.gca().yaxis.set_ticks_position('left')
     return
 
-def plot_dft(dft_data, title, show=True, ax=None):
+def get_range_limits(dims, nsamples, nchirps=128, T_c=54, c=300, f_0=77,
+                     f_s=24.6, S=6.5):
+    """
+    Return the range and velocity scales, based on radar parameters
+
+    @param nsamples: number of samples per chirp
+    @param nchirps: number of chirps in a frame
+    @param T_c: chirp period, in [us]
+    @param c: speed of light, in [m/us]
+    @param f_0: chirp starting frequency, in [GHz]
+    @param f_s: ADC sampling rate, in [MHz]
+    @param S: chirp ramp slope, in [MHz/us]
+    """
+    # Radar maximum detectable frequency (in MHz) and wavelength
+    f_max = f_s / 2
+    wavelength = c*1000 / f_0
+    # Calculate maximum and minimum measurable ranges
+    d_max = (f_max*c) / (2*S)
+    d_min = d_max / (nsamples)
+    # Calculate maximum and minimum measurable velocities
+    v_max = wavelength / (4*T_c)
+    v_min = v_max / nchirps
+    if dims==1:
+        return (d_max, d_min)
+    else:
+        return (d_max, d_min, v_max, v_min)
+
+def plot_dft(dft_data, title, show=True, ax=None, cropped=False):
     if dft_data.ndim==1:
-        fig, ax = plot_1dfft(dft_data, title, show)
+        fig, ax = plot_1dfft(dft_data, title, show, cropped)
     elif dft_data.ndim==2:
-        fig, ax = plot_2dfft(dft_data, title, show, ax)
+        fig, ax = plot_2dfft(dft_data, title, show, ax, cropped)
     return (fig, ax)
 
-def plot_1dfft(dft_data, title="Spiking DFT", show=True):
-    # Radar parameters
-    c = 3 * 10**2   # [m/us]
-    f_max = 24 / 2  # [GHz]
-    S = 6.55        # [GHz/us]
-    # Calculate maximum range
-    d_max = (f_max*c) / (2*S)
-    freq_bins = np.arange(0, d_max, d_max/dft_data.size)[:dft_data.size]
+def plot_1dfft(dft_data, title="Spiking DFT", show=True, cropped=False):
+    format_plotting()
+    d_max, d_min = get_range_limits(dims=1, nsamples=dft_data.size)
+    freq_bins = np.arange(d_min, d_max+d_min, d_min)[:dft_data.size]
+    if cropped:
+        dft_data = dft_data[:200]
+        freq_bins = freq_bins[:200]
     # Plot results
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14, 5))
-    format_plotting()
     ax.plot(freq_bins, dft_data)
     ax.set_xlabel("Range (m)", fontsize=20)
     ax.set_yticks([])
-    ax.set_xticks(np.arange(0, 300, 60))
-    ax.set_xticklabels(np.arange(0,300, 60), fontsize=18)
     ax.spines['left'].set_visible(False)
     ax.set_title(title)
     plt.tight_layout()
@@ -68,25 +91,19 @@ def plot_1dfft(dft_data, title="Spiking DFT", show=True):
         plt.show()
     return (fig, ax)
 
-def plot_2dfft(dft_data, title="Spiking DFT", show=True, ax=None):
-    # Radar parameters
-    f_s = 77        # [GHz]
-    c = 3 * 10**2   # [m/us]
-    f_max = 24 / 2  # [GHz]
-    S = 6.55        # [GHz/us]
-    T_chirp = 54    # [us]
-    n_chirps = 128
-    # Calculate maximum range and velocity of the DFT spectrum
-    wavelength = c*1000 / f_s
-    d_max = (f_max*c) / (2*S)
-    v_max = wavelength / (4*T_chirp)
-    v_min = v_max / n_chirps
-
+def plot_2dfft(dft_data, title="Spiking DFT", show=True, ax=None,
+               cropped=False):
+    d_max, d_min, v_max, v_min = get_range_limits(dims=2, nchirps=128,
+                                                  nsamples=dft_data.shape[0])
+    if cropped:
+        dft_data = dft_data[-200:, :]
+        d_max *= 200/449
     if not ax:
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,6))
     else:
         fig = None
-    ax.imshow(20*np.log10(dft_data), extent=[-v_max, v_max-2*v_min, 0, d_max],)
+    ax.imshow(20*np.log10(dft_data),
+              extent=[-v_max, v_max-2*v_min, d_min, d_max])
     format_plotting()
     ax.set_xlabel("Speed (m/s)", fontsize=20)
     ax.set_ylabel("Range (m)", fontsize=20)
@@ -102,40 +119,43 @@ def plot_2dfft(dft_data, title="Spiking DFT", show=True, ax=None):
 
     return fig, ax
 
-
-def plot_cfar(cfar_object, title= "Spiking OS-CFAR", show=True, ax=None):
+def plot_cfar(cfar_object, title= "Spiking OS-CFAR", show=True, ax=None,
+              cropped=False):
     """
     Visualize the input and output data.
     """
     if cfar_object.input_array.ndim == 1:
-        fig, ax = plot_cfar_1d(cfar_object, show, title)
+        fig, ax = plot_cfar_1d(cfar_object, show, title, cropped)
     elif cfar_object.input_array.ndim == 2:
         fig, ax = plot_cfar_2d(cfar_object, show, title, ax=ax)
     return (fig, ax)
 
-def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR"):
+def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR", cropped=False):
     """
     Visualize the 1D input and output data.
     """
-    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14, 5))
     format_plotting()
+    d_max, d_min = get_range_limits(dims=1, nsamples=449)
+    freq_bins = np.arange(d_min, d_max+d_min, d_min)
+    if cropped:
+        freq_bins = freq_bins[:200]
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14, 5))
 
     # plot input data
     if not cfar_object.zero_padding:
-        ax.plot(cfar_object.input_array, label='signal')
+        ax.plot(cfar_object.input_array, label='FT')
     else:
         tmp_padding = cfar_object.guarding_cells + cfar_object.neighbour_cells
         tmp_size = cfar_object.input_array.size - 2*tmp_padding   
-        ax.plot(cfar_object.input_array[tmp_padding:tmp_size+tmp_padding],
-                label='signal')
+        ax.plot(freq_bins,
+                cfar_object.input_array[tmp_padding:tmp_size+tmp_padding],
+                label='FT')
 
     # plot threshold line
     if cfar_object.show_threshold:
         low = cfar_object.guarding_cells+cfar_object.neighbour_cells
         high = cfar_object.guarding_cells+cfar_object.neighbour_cells+ \
                 cfar_object.threshold.size
-        # ax.plot(range(low,high),cfar_object.threshold, ls='dotted', lw=1,
-        #         c='C3', label='threshold')
 
     # plot detected peaks
     cntr = 0
@@ -153,10 +173,10 @@ def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR"):
     else:
         for x in np.where(cfar_object.results>=1)[0]:
             if cntr == 0:
-                plt.axvline(x, ls='--', c='C1', lw=1, label='detected peaks')
+                plt.axvline(x+0.63, ls='--', c='C1', lw=1, label='detected peaks')
                 cntr +=1
             else:
-                ax.axvline(x, ls='--', c='C1', lw=1)
+                ax.axvline(x*0.632+0.63, ls='--', c='C1', lw=1)
     
     # plot boundaries where algorithm works properly
     if not cfar_object.zero_padding:
@@ -172,9 +192,9 @@ def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR"):
     ax.legend(framealpha=1)
     ax.set_xlabel("Range (m)", fontsize=20)
     ax.set_yticks([])
-    ax.set_xticks(np.arange(0, 470, 94))
-    ax.set_xticklabels(np.arange(0,300, 60), fontsize=18)
     ax.spines['left'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
     ax.set_title(title)
     plt.tight_layout()
     if show:
@@ -187,18 +207,8 @@ def plot_cfar_2d(cfar_object, show=True, title="Spiking DFT", ax=None):
     """
     Visualize the 2D input and output data.
     """
-    # Radar parameters
-    f_s = 77        # [GHz]
-    c = 3 * 10**2   # [m/us]
-    f_max = 24 / 2  # [GHz]
-    S = 6.55        # [GHz/us]
-    T_chirp = 54    # [us]
-    n_chirps = 128
-    # Calculate maximum range and velocity of the DFT spectrum
-    wavelength = c*1000 / f_s
-    d_max = (f_max*c) / (2*S)
-    v_max = wavelength / (4*T_chirp)
-    v_min = v_max / n_chirps
+    d_max, d_min, v_max, v_min = get_range_limits(dims=2, nchirps=128,
+                                                  nsamples=449)
 
     # Create the CFAR array
     if not cfar_object.zero_padding:
@@ -217,7 +227,7 @@ def plot_cfar_2d(cfar_object, show=True, title="Spiking DFT", ax=None):
         fig = None
         ax.set_yticks([])
     format_plotting()
-    ax.imshow(result, extent=[-v_max, v_max-2*v_min, 0, d_max])
+    ax.imshow(result, extent=[-v_max, v_max-2*v_min, d_min, d_max])
     ax.set_aspect("auto")
     plt.xlabel("Speed (m/s)", fontsize=20)
     plt.title(title)

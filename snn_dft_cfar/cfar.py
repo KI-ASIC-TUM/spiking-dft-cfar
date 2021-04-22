@@ -283,7 +283,7 @@ class OSCFAR(TraditionalCFAR):
     Ordered Statistics CFAR algorithm
     """
     def __init__(self, scale_factor, guarding_cells, neighbour_cells, k,
-                 zero_padding):
+                 zero_padding, **kwargs):
         """
         Initialization
 

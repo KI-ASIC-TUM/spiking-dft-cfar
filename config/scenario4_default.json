@@ -1,5 +1,5 @@
 {
-    "filename": "data/BBM/scenario4/samples_ch_3_scenario4.txt",
+    "filename": "data/BBM/scenario4.1/samples_ch_3.txt",
     "cfar_args":
     {
         "1D":
@@ -33,6 +33,6 @@
         "min_value": 0,
         "max_value": 2,
         "time_range": 1,
-        "time_step": 0.0002
+        "time_step": 0.001
     }
 }

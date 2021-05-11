@@ -25,9 +25,9 @@ def dft(raw_data, dimensions, dft_args, method):
     @param dft_args: parameters of the rate coding for the SNN version
     @param method: "snn" or "numpy"
     """
-    if method=="SNN":
+    if method=="snn":
         result = spiking_dft(raw_data, dimensions, dft_args)
-    elif method=="ANN":
+    elif method=="ann":
         result = ann_dft(raw_data, dimensions)
     elif method=="numpy":
         result = standard_dft(raw_data, dimensions)

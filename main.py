@@ -51,7 +51,7 @@ def parse_args():
     args = parser.parse_args()
     config_file = args.config_file
     dimensions = args.dimensions
-    method = args.method
+    method = (args.method).lower()
     from_file = args.f
     show_plot = args.s
     return (config_file, dimensions, method, from_file, show_plot)
@@ -73,7 +73,7 @@ def load_config(conf_file, dims, method):
     dft_args = {}
     cfar_args = config_data["cfar_args"]["{}D".format(dims)]
     # Append encoding parameteres if an SNN is used
-    if method=="SNN":
+    if method=="snn":
         cfar_args.update(config_data["cfar_encoding_parameters"])
         dft_args = config_data["dft_encoding_parameters"]
     return (fpath, cfar_args, dft_args)

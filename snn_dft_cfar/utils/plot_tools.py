@@ -74,6 +74,7 @@ def plot_dft(dft_data, title, show=True, ax=None, cropped=False):
 
 def plot_1dfft(dft_data, title="Spiking DFT", show=True, cropped=False):
     format_plotting()
+    plt.close()
     d_max, d_min = get_range_limits(dims=1, nsamples=dft_data.size)
     freq_bins = np.arange(d_min, d_max+d_min, d_min)[:dft_data.size]
     if cropped:

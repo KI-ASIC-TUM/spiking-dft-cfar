@@ -1,6 +1,13 @@
 # spiking-DFT-CFAR
 
-Implementation of a Spiking Neural Network solving the 2-D Discrete Fourier Transform and the OS-CFAR segmentation algorithm for automotive radar raw data
+Implementation of a Spiking Neural Network solving the 1D and 2D Discrete Fourier
+Transform and the OS-CFAR detection algorithm for automotive radar raw data.
+
+The algorithm has been introduced in the following paper:
+
+_López-Randulfe, J., Duswald, T., Bing, Z., and Knoll, A. "Spiking Neural Network
+for Fourier Transform and Object Detection for Automotive Radar".
+Frontiers in Neurorobotics (2021) doi: 10.3389/fnbot.2021.688344._
 
 
 # Installation
@@ -12,7 +19,10 @@ Once you are in the main project directory, just install it as a normal Python3 
 
 # Usage
 
-The main module is the entry point for testing the algorithm. Create your custom configuration for the experiment or use the custom one, and select the number of dimensions (1 or 2) and the method to be used ("numpy" for the standard DFT and OS-CFAR, or "SNN" for the spiking version):
+The main module is the entry point for testing the algorithm. Create your custom
+configuration for the experiment or use the custom one, and select the number of
+dimensions (1 or 2) and the method to be used ("numpy" for the standard DFT and
+OS-CFAR, or "SNN" for the spiking version):
 
     usage: main.py [-h] [-d {1 2}] [-m {numpy SNN}] [-f] config_file
 

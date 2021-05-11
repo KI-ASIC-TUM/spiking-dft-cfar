@@ -23,7 +23,7 @@ def main():
 
     # print test information
     print()
-    print(34*"=","CFAR test", 34*"=")
+    print(34 * "=", "CFAR test", 34 * "=")
     print("Benchmark different variations of CFAR.")
     print()
     print("Parameters:")
@@ -40,7 +40,6 @@ def main():
     print("x_min : {}".format(x_min))
     print()
 
-
     # generate data with peaks
     rng = np.random.default_rng(seed=random_seed)
     data = rng.random(data_size)
@@ -48,10 +47,10 @@ def main():
         data[i] += 1
 
     # initialize CFAR
-    cacfar = CACFAR(scale_factor,guarding_cells,neighbour_cells)
-    oscfar = OSCFAR(scale_factor,guarding_cells,neighbour_cells,k)
-    snnoscfar = OSCFAR_SNN(scale_factor,guarding_cells,neighbour_cells, k,
-                        t_max, t_min, x_max, x_min)
+    cacfar = CACFAR(scale_factor, guarding_cells, neighbour_cells)
+    oscfar = OSCFAR(scale_factor, guarding_cells, neighbour_cells, k)
+    snnoscfar = OSCFAR_SNN(scale_factor, guarding_cells, neighbour_cells, k,
+                           t_max, t_min, x_max, x_min)
 
     # run CFAR benchmarks
     print('running benchmarks .. \n')
@@ -66,11 +65,11 @@ def main():
     end_snnoscfar = timer()
     print('Benchmark results: time per sliding window')
     print('CACFAR : {0:.6f}'.format(
-            (end_cacfar-start_cacfar)/cacfar.results.size))
+        (end_cacfar - start_cacfar) / cacfar.results.size))
     print('OSCFAR : {0:.6f}'.format(
-            (end_oscfar-start_oscfar)/oscfar.results.size))
+        (end_oscfar - start_oscfar) / oscfar.results.size))
     print('SNNCFAR: {0:.6f}'.format(
-            (end_snnoscfar-start_snnoscfar)/snnoscfar.results.size))
+        (end_snnoscfar - start_snnoscfar) / snnoscfar.results.size))
     print()
 
     # visualize CFAR
@@ -78,7 +77,7 @@ def main():
     print("Second plot:    OSCFAR")
     print("Third  plot: SNNOSCFAR")
     print("Note that the OSCFAR and SNNOSCFAR should detect the same peaks.")
-    print((68+11)*"=")
+    print((68 + 11) * "=")
     print()
     plot_cfar(cacfar)
     plot_cfar(oscfar)

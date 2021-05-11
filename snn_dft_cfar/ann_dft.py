@@ -8,7 +8,11 @@ import numpy as np
 
 
 class FourierTransformArtificialNetwork():
-    def __init__(self, n_input, n_chirps, time_step=0.001, total_time=5,
+    def __init__(self,
+                 n_input,
+                 n_chirps,
+                 time_step=0.001,
+                 total_time=5,
                  normalize=True):
         self.n_input = n_input
         self.n_chirps = n_chirps
@@ -24,7 +28,7 @@ class FourierTransformArtificialNetwork():
         Calculate 1-D FFT coefficients based on algorithm
         """
         # Constant present in all weight elements
-        c_1 = 2*np.pi / self.n_input
+        c_1 = 2 * np.pi / self.n_input
 
         # Calculate the content of the cosines/sines as a dot product
         n = np.arange(self.n_input).reshape(self.n_input, 1)
@@ -56,7 +60,7 @@ class FourierTransformArtificialNetwork():
         Calculate 2-D FFT coefficients based on algorithm
         """
         # Constant present in all weight elements
-        c_1 = 2*np.pi / self.n_chirps
+        c_1 = 2 * np.pi / self.n_chirps
 
         # Calculate the content of the cosines/sines as a dot product
         m = np.arange(self.n_chirps).reshape(self.n_chirps, 1)
@@ -95,8 +99,8 @@ class FourierTransformArtificialNetwork():
         z_1_imag = np.dot(self.weights[0][1], input_values.transpose())
         z_1 = np.hstack((z_1_real, z_1_imag))
         # ReLU functionality
-        z_1 = np.where(z_1>0, z_1, 0)
-        if layers==1:
+        z_1 = np.where(z_1 > 0, z_1, 0)
+        if layers == 1:
             return z_1
 
         ## Layer 2
@@ -104,5 +108,5 @@ class FourierTransformArtificialNetwork():
         z_2_imag = np.dot(self.weights[1][1], z_1.transpose())
         z_2 = np.hstack((z_2_real, z_2_imag))
         # ReLU functionality
-        z_2 = np.where(z_1>0, z_1, 0)
+        z_2 = np.where(z_1 > 0, z_1, 0)
         return self.spike_trains_l2

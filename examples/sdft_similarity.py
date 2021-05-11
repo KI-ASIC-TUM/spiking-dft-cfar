@@ -18,6 +18,7 @@ def normalize(data):
     normalized = no_offset / no_offset.max()
     return normalized
 
+
 def rmse(data_1, data_2):
     """
     Calculate the Root Mean Square Error between the two input sets
@@ -26,6 +27,7 @@ def rmse(data_1, data_2):
     rmse = np.sqrt((error**2).sum() / error.size)
     print("Root mean square error: {}".format(rmse))
     return rmse
+
 
 def main(dimensions=2, plot=False):
     """
@@ -41,17 +43,21 @@ def main(dimensions=2, plot=False):
     }
     fname = "../data/BBM/scenario4/samples_ch_1_scenario4.txt"
     data_cube = snn_dft_cfar.utils.read_data.bbm_get_datacube(fname)[:, :900]
-    if dimensions==1:
+    if dimensions == 1:
         chirp_n = 15
         raw_data = data_cube[chirp_n]
-    if dimensions==2:
+    if dimensions == 2:
         raw_data = data_cube
 
-    sdft = snn_dft_cfar.dft.dft(raw_data, dimensions, dft_encoding_parameters,
+    sdft = snn_dft_cfar.dft.dft(raw_data,
+                                dimensions,
+                                dft_encoding_parameters,
                                 method="SNN")
-    fft = snn_dft_cfar.dft.dft(raw_data, dimensions, dft_args=None,
+    fft = snn_dft_cfar.dft.dft(raw_data,
+                               dimensions,
+                               dft_args=None,
                                method="numpy")
-    if dimensions==2:
+    if dimensions == 2:
         fft = fft[:-1, :]
 
     # Normalize both outputs and calculate the RMSE

@@ -19,8 +19,8 @@ import snn_dft_cfar.utils.plot_tools
 logger = logging.getLogger('S-DFT S-CFAR')
 
 
-def dft_cfar(raw_data, dimensions, dft_args, cfar_args, method="SNN",
-             from_file=False):
+def dft_cfar(raw_data, dimensions, dft_args, cfar_args, method="snn",
+             from_file=False, cropped=False):
     """
     Call the routines for executing the DFT and the OS-CFAR
     """
@@ -37,7 +37,14 @@ def dft_cfar(raw_data, dimensions, dft_args, cfar_args, method="SNN",
         t_dft = time.time()
         np.savetxt(fname, dft)
     logger.info("Running CFAR algorithm")
-    cfar = run_cfar(dft, cfar_args, method)
+    # Uncomment only for final plotting purposes
+    if cropped:
+        if dimensions==1:
+            cfar = run_cfar(dft[:200], cfar_args, method)
+        else:
+            cfar = run_cfar(dft[-200:], cfar_args, method)
+    else:
+        cfar = run_cfar(dft, cfar_args, method)
     t_cfar = time.time()
 
     logger.debug("Total DFT time: {:.5f}".format(t_dft-t_0))
@@ -46,19 +53,21 @@ def dft_cfar(raw_data, dimensions, dft_args, cfar_args, method="SNN",
     return dft, cfar
 
 
-def run_cfar(dft_data, cfar_args, method="SNN"):
+def run_cfar(dft_data, cfar_args, method="snn"):
     """
     Run the corresponding OS-CFAR algorithm on the provided DFT data
     """
-    if method=="numpy" or method=="ANN":
+    if method=="numpy" or method=="ann":
         cfar = snn_dft_cfar.cfar.OSCFAR(**cfar_args)
-    elif method=="SNN":
+    elif method=="snn":
+        cfar_args["x_max"] = dft_data.max()
         cfar = snn_dft_cfar.cfar.OSCFAR_SNN(**cfar_args)
     cfar(dft_data)
     return cfar
 
 
-def plot(dft, cfar, dims, method, plot_together=True, show=True, fmt="pdf"):
+def plot(dft, cfar, dims, method, plot_together=True, show=True, fmt="pdf",
+         cropped=False):
     """
     Save figures containing the DFT and the CFAR of the experiment
 
@@ -70,8 +79,9 @@ def plot(dft, cfar, dims, method, plot_together=True, show=True, fmt="pdf"):
     @param plot_together: In the case of a 2D simulation, generate the
     DFT and CFAR plots in a single figure
     @param show: Show the resulting plots from the simulation
+    @param cropped: Crop the result to the first 200 range bins
     """
-    if method=="SNN":
+    if method=="snn":
         dft_title = "Spiking DFT"
         cfar_title = "Spiking OS-CFAR"
     else:
@@ -82,9 +92,11 @@ def plot(dft, cfar, dims, method, plot_together=True, show=True, fmt="pdf"):
     logger.info("Saving plots in {}".format(results_path))
     if not plot_together or dims==1:
         fig_dft, ax1 = snn_dft_cfar.utils.plot_tools.plot_dft(dft, dft_title,
-                                                              show=False)
+                                                              show=False,
+                                                              cropped=cropped)
         fig_cfar, ax2 = snn_dft_cfar.utils.plot_tools.plot_cfar(cfar, cfar_title,
-                                                                show=False)
+                                                                show=False,
+                                                                cropped=cropped)
         # Save the figures to local files
         fig_dft.savefig("{}/dft{}D_{}.{}".format(
                 results_path,dims, method, fmt), dpi=150)
@@ -94,9 +106,9 @@ def plot(dft, cfar, dims, method, plot_together=True, show=True, fmt="pdf"):
         fig, axes = plt.subplots(ncols=2, figsize=(12, 6))
         plt.subplots_adjust(wspace=0.05)
         snn_dft_cfar.utils.plot_tools.plot_dft(dft, dft_title, show=False,
-                                               ax=axes[0])
+                                               ax=axes[0], cropped=cropped)
         snn_dft_cfar.utils.plot_tools.plot_cfar(cfar, cfar_title, show=False,
-                                                ax=axes[1])
+                                                ax=axes[1], cropped=cropped)
         fig.savefig("{}/pipeline{}D_{}.{}".format(
                     results_path, dims, method, fmt), dpi=50)
     if show:

@@ -42,7 +42,7 @@ def dft_cfar(raw_data, dimensions, dft_args, cfar_args, method="SNN",
         if dimensions==1:
             cfar = run_cfar(dft[:200], cfar_args, method)
         else:
-            cfar = run_cfar(dft[-200:], cfar_args, method="numpy")
+            cfar = run_cfar(dft[-200:], cfar_args, method)
     else:
         cfar = run_cfar(dft, cfar_args, method)
     t_cfar = time.time()
@@ -60,6 +60,7 @@ def run_cfar(dft_data, cfar_args, method="SNN"):
     if method=="numpy" or method=="ANN":
         cfar = snn_dft_cfar.cfar.OSCFAR(**cfar_args)
     elif method=="SNN":
+        cfar_args["x_max"] = dft_data.max()
         cfar = snn_dft_cfar.cfar.OSCFAR_SNN(**cfar_args)
     cfar(dft_data)
     return cfar

@@ -1,8 +1,9 @@
 from numba import jit
 
+
 # outsourced IF simulation to efficient numba compiled function
 @jit(nopython=True)
-def simulate_IF_neuron(start,end,t_step,spike_times,weights):
+def simulate_IF_neuron(start, end, t_step, spike_times, weights):
     '''
     Simulation of IF neuron. Simultates neuron behaviour from <start> to <end>
     using timesteps of size <t_step>. <spike_times> defines the spike times of 
@@ -18,14 +19,14 @@ def simulate_IF_neuron(start,end,t_step,spike_times,weights):
     res = 0
     v_mem = 0.0
     while (time < end + 2*t_step):
-        
+
         # add spikes weights of spiking inputs to v_mem
-        v_mem += weights[(time<=spike_times) & 
-                          (spike_times<time+t_step)].sum()
+        v_mem += weights[(time <= spike_times)
+                         & (spike_times < time+t_step)].sum()
 
         # update time
         time += t_step
-    
+
         # test for spike
         if v_mem >= 1.0:
             res = 1

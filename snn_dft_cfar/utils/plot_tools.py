@@ -38,8 +38,16 @@ def format_plotting():
     plt.gca().yaxis.set_ticks_position('left')
     return
 
-def get_range_limits(dims, nsamples, nchirps=128, T_c=54, c=300, f_0=77,
-                     f_s=24.6, S=6.5):
+
+def get_range_limits(dims,
+                     nsamples,
+                     nchirps=128,
+                     T_c=54,
+                     c=300,
+                     f_0=77,
+                     f_s=24.6,
+                     S=6.5
+                    ):
     """
     Return the range and velocity scales, based on radar parameters
 
@@ -53,24 +61,26 @@ def get_range_limits(dims, nsamples, nchirps=128, T_c=54, c=300, f_0=77,
     """
     # Radar maximum detectable frequency (in MHz) and wavelength
     f_max = f_s / 2
-    wavelength = c*1000 / f_0
+    wavelength = c * 1000 / f_0
     # Calculate maximum and minimum measurable ranges
     d_max = (f_max*c) / (2*S)
     d_min = d_max / (nsamples)
     # Calculate maximum and minimum measurable velocities
     v_max = wavelength / (4*T_c)
     v_min = v_max / nchirps
-    if dims==1:
+    if dims == 1:
         return (d_max, d_min)
     else:
         return (d_max, d_min, v_max, v_min)
 
+
 def plot_dft(dft_data, title, show=True, ax=None, cropped=False):
-    if dft_data.ndim==1:
+    if dft_data.ndim == 1:
         fig, ax = plot_1dfft(dft_data, title, show, cropped)
-    elif dft_data.ndim==2:
+    elif dft_data.ndim == 2:
         fig, ax = plot_2dfft(dft_data, title, show, ax, cropped)
     return (fig, ax)
+
 
 def plot_1dfft(dft_data, title="Spiking DFT", show=True, cropped=False):
     format_plotting()
@@ -92,19 +102,27 @@ def plot_1dfft(dft_data, title="Spiking DFT", show=True, cropped=False):
         plt.show()
     return (fig, ax)
 
-def plot_2dfft(dft_data, title="Spiking DFT", show=True, ax=None,
-               cropped=False):
-    d_max, d_min, v_max, v_min = get_range_limits(dims=2, nchirps=128,
-                                                  nsamples=dft_data.shape[0])
+
+def plot_2dfft(dft_data,
+               title="Spiking DFT",
+               show=True,
+               ax=None,
+               cropped=False
+              ):
+    d_max, d_min, v_max, v_min = get_range_limits(dims=2,
+                                                  nchirps=128,
+                                                  nsamples=dft_data.shape[0]
+                                                 )
     if cropped:
         dft_data = dft_data[-200:, :]
-        d_max *= 200/449
+        d_max *= 200 / 449
     if not ax:
-        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,6))
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6, 6))
     else:
         fig = None
     ax.imshow(20*np.log10(dft_data),
-              extent=[-v_max, v_max-2*v_min, d_min, d_max])
+              extent=[-v_max, v_max-2*v_min, d_min, d_max]
+             )
     format_plotting()
     ax.set_xlabel("Speed (m/s)", fontsize=20)
     ax.set_ylabel("Range (m)", fontsize=20)
@@ -120,7 +138,11 @@ def plot_2dfft(dft_data, title="Spiking DFT", show=True, ax=None,
 
     return fig, ax
 
-def plot_cfar(cfar_object, title= "Spiking OS-CFAR", show=True, ax=None,
+
+def plot_cfar(cfar_object,
+              title="Spiking OS-CFAR",
+              show=True,
+              ax=None,
               cropped=False):
     """
     Visualize the input and output data.
@@ -130,6 +152,7 @@ def plot_cfar(cfar_object, title= "Spiking OS-CFAR", show=True, ax=None,
     elif cfar_object.input_array.ndim == 2:
         fig, ax = plot_cfar_2d(cfar_object, show, title, ax=ax)
     return (fig, ax)
+
 
 def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR", cropped=False):
     """
@@ -147,48 +170,61 @@ def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR", cropped=False):
         ax.plot(cfar_object.input_array, label='FT')
     else:
         tmp_padding = cfar_object.guarding_cells + cfar_object.neighbour_cells
-        tmp_size = cfar_object.input_array.size - 2*tmp_padding   
+        tmp_size = cfar_object.input_array.size - 2*tmp_padding
         ax.plot(freq_bins,
-                cfar_object.input_array[tmp_padding:tmp_size+tmp_padding],
+                cfar_object.input_array[tmp_padding : tmp_size+tmp_padding],
                 label='FT')
 
     # plot threshold line
     if cfar_object.show_threshold:
-        low = cfar_object.guarding_cells+cfar_object.neighbour_cells
-        high = cfar_object.guarding_cells+cfar_object.neighbour_cells+ \
-                cfar_object.threshold.size
+        low = cfar_object.guarding_cells + cfar_object.neighbour_cells
+        high = (cfar_object.guarding_cells
+                + cfar_object.neighbour_cells
+                + cfar_object.threshold.size
+               )
 
     # plot detected peaks
     cntr = 0
     if not cfar_object.zero_padding:
-        for x in np.where(cfar_object.results>=1)[0]:
+        for x in np.where(cfar_object.results >= 1)[0]:
             if cntr == 0:
                 plt.axvline(x+cfar_object.guarding_cells+ \
                             cfar_object.neighbour_cells,ls='--',
                             c='C1', lw=1, label='detected peaks')
-                cntr +=1
+                cntr += 1
             else:
                 ax.axvline(x+cfar_object.guarding_cells+ \
                             cfar_object.neighbour_cells, ls='--',
                             c='C1', lw=1)
     else:
-        for x in np.where(cfar_object.results>=1)[0]:
+        for x in np.where(cfar_object.results >= 1)[0]:
             if cntr == 0:
-                plt.axvline(x+0.63, ls='--', c='C1', lw=1, label='detected peaks')
-                cntr +=1
+                plt.axvline(x + 0.63,
+                            ls='--',
+                            c='C1',
+                            lw=1,
+                            label='detected peaks')
+                cntr += 1
             else:
                 ax.axvline(x*0.632+0.63, ls='--', c='C1', lw=1)
-    
+
     # plot boundaries where algorithm works properly
     if not cfar_object.zero_padding:
         ax.axvline(cfar_object.guarding_cells+cfar_object.neighbour_cells-1,
-                    ls='--', c='C2', lw=1, label='algorithm boundaries')
-        ax.axvline(cfar_object.results.size+cfar_object.guarding_cells+
-                    cfar_object.neighbour_cells,
-                    ls='--', c='C2', lw=1)
+                   ls='--',
+                   c='C2',
+                   lw=1,
+                   label='algorithm boundaries')
+        ax.axvline(cfar_object.results.size
+                   + cfar_object.guarding_cells
+                   + cfar_object.neighbour_cells,
+                   ls='--',
+                   c='C2',
+                   lw=1
+                  )
     else:
         pass
-    
+
     # show plot
     ax.legend(framealpha=1)
     ax.set_xlabel("Range (m)", fontsize=20)
@@ -204,25 +240,29 @@ def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR", cropped=False):
 
     return (fig, ax)
 
+
 def plot_cfar_2d(cfar_object, show=True, title="Spiking DFT", ax=None):
     """
     Visualize the 2D input and output data.
     """
-    d_max, d_min, v_max, v_min = get_range_limits(dims=2, nchirps=128,
-                                                  nsamples=449)
+    d_max, d_min, v_max, v_min = get_range_limits(dims=2,
+                                                  nchirps=128,
+                                                  nsamples=449
+                                                 )
 
     # Create the CFAR array
     if not cfar_object.zero_padding:
         result = np.zeros_like(cfar_object.input_array)
-        temp = cfar_object.guarding_cells+cfar_object.neighbour_cells
-        result[temp:temp+cfar_object.results.shape[0],
-                temp:temp+cfar_object.results.shape[1]] = cfar_object.results
+        temp = cfar_object.guarding_cells + cfar_object.neighbour_cells
+        result[temp : temp+cfar_object.results.shape[0],
+               temp : temp+cfar_object.results.shape[1]
+              ] = cfar_object.results
     else:
         result = cfar_object.results
 
     # Plot output 2D CFAR
     if not ax:
-        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,6))
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6, 6))
         plt.ylabel("Range (m)")
     else:
         fig = None

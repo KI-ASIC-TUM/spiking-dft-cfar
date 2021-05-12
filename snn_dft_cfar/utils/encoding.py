@@ -27,8 +27,15 @@ class Encoder(ABC):
 
 
 class LinearFrequencyEncoder(Encoder):
-    def __init__(self, min_frequency, max_frequency, min_value, max_value,
-                 time_range, time_step=0.0001, random_init=False):
+    def __init__(self,
+                 min_frequency,
+                 max_frequency,
+                 min_value,
+                 max_value,
+                 time_range,
+                 time_step=0.0001,
+                 random_init=False
+                ):
         super().__init__()
         # Store encoder ranges
         self.min_frequency = min_frequency
@@ -63,7 +70,7 @@ class LinearFrequencyEncoder(Encoder):
         Returns the tuple (period, init_spike, n_spike)
         """
         # Calculate spiking frequency and period
-        freq = self.min_frequency + (value-self.min_value)*self.scale_factor
+        freq = self.min_frequency + (value-self.min_value) * self.scale_factor
         period = ((1.0 / freq) / self.time_step).astype(np.int64)
         # Generate the first spike at a random position within the range of the
         # obtained period
@@ -76,7 +83,7 @@ class LinearFrequencyEncoder(Encoder):
 
     def run(self, value):
         # If input is vector, transform it into 1xN array
-        if len(value.shape)==1:
+        if len(value.shape) == 1:
             value = value.reshape(1, -1)
         rows = value.shape[0]
         cols = value.shape[1]
@@ -101,7 +108,6 @@ class TimeEncoder(Encoder):
           (1- frac{x_i - x_{min}}{x_{max}-x_{min}} ) + t_{min}
 
     """
-
     def __init__(self, t_max, t_min, x_max, x_min):
         """
         Initialization.

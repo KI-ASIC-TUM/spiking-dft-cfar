@@ -25,26 +25,43 @@ def parse_args():
             return False
         else:
             raise argparse.ArgumentTypeError('Boolean value expected.')
+
     parser = argparse.ArgumentParser(
-        usage="main.py [-h] [-d {1 2}] [-m {numpy SNN}] [-f] config_file"
-    )
-    parser.add_argument("config_file", type=str,
+        usage="main.py [-h] [-d {1 2}] [-m {numpy SNN}] [-f] config_file")
+    parser.add_argument("config_file",
+                        type=str,
                         help="Relative location of the configuration file"
                        )
-    parser.add_argument("-d", "--dimensions", type=int, choices=[1, 2],
-                        default=1, metavar="",
+    parser.add_argument("-d",
+                        "--dimensions",
+                        type=int,
+                        choices=[1, 2],
+                        default=1,
+                        metavar="",
                         help="{1 | 2} number of DFT dimensions"
                        )
-    parser.add_argument("-m", "--method", type=str, choices=["numpy", "SNN", "ANN"],
-                        default="SNN", metavar="",
+    parser.add_argument("-m",
+                        "--method",
+                        type=str,
+                        choices=["numpy", "SNN", "ANN"],
+                        default="SNN",
+                        metavar="",
                         help="{numpy | SNN} method used for running the system"
                        )
-    parser.add_argument("-f", type=str2bool, default=False,
-                        nargs='?', const=True, metavar="",
+    parser.add_argument("-f",
+                        type=str2bool,
+                        default=False,
+                        nargs='?',
+                        const=True,
+                        metavar="",
                         help="Get the S-DFT data from a local file"
                        )
-    parser.add_argument("-s", type=str2bool, default=False,
-                        nargs='?', const=True, metavar="",
+    parser.add_argument("-s",
+                        type=str2bool,
+                        default=False,
+                        nargs='?',
+                        const=True,
+                        metavar="",
                         help="Show the plot after the simulation"
                        )
     # Get the values from the argument list
@@ -73,7 +90,7 @@ def load_config(conf_file, dims, method):
     dft_args = {}
     cfar_args = config_data["cfar_args"]["{}D".format(dims)]
     # Append encoding parameteres if an SNN is used
-    if method=="snn":
+    if method == "snn":
         cfar_args.update(config_data["cfar_encoding_parameters"])
         dft_args = config_data["dft_encoding_parameters"]
     return (fpath, cfar_args, dft_args)
@@ -115,16 +132,23 @@ def run(fpath, dims, dft_args, cfar_args, method, from_file, show_plot,
     # Only the 900 first samples contain information
     data_cube = snn_dft_cfar.utils.read_data.bbm_get_datacube(fpath)[:, :900]
     # Run corresponding routine based on the number of dimensions
-    if dims==1:
+    if dims == 1:
         chirp_n = 77
         raw_data = data_cube[chirp_n]
-    if dims==2:
+    if dims == 2:
         raw_data = data_cube
     dft, cfar = snn_dft_cfar.run_dft_cfar.dft_cfar(raw_data, dims, dft_args,
-                                                   cfar_args, method, from_file,
-                                                   cropped)
-    snn_dft_cfar.run_dft_cfar.plot(dft, cfar, dims, method, show=show_plot,
-                                   fmt=fmt, cropped=cropped)
+                                                   cfar_args, method,
+                                                   from_file, cropped
+                                                  )
+    snn_dft_cfar.run_dft_cfar.plot(dft,
+                                   cfar,
+                                   dims,
+                                   method,
+                                   show=show_plot,
+                                   fmt=fmt,
+                                   cropped=cropped
+                                  )
     return
 
 
@@ -139,9 +163,9 @@ def main():
     logger = conf_logger()
 
     init_message = "Running spiking-dft-cfar program:"
-    init_message +="\n- Configuration file: {}".format(conf_file)
-    init_message +="\n- Number of dimensions: {}".format(dims)
-    init_message +="\n- Method: {}".format(method)
+    init_message += "\n- Configuration file: {}".format(conf_file)
+    init_message += "\n- Number of dimensions: {}".format(dims)
+    init_message += "\n- Method: {}".format(method)
     logger.info(init_message)
 
     run(fpath, dims, dft_args, cfar_args, method, from_file, show_plot,

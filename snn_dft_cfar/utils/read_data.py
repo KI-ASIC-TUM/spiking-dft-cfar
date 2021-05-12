@@ -38,6 +38,7 @@ def soli_get_datacube(filename):
         data_cube = data_cube.astype(np.float)
     return data_cube
 
+
 def bbm_get_datacube(filename):
     """
     Read file with the BBM simulator data and arrange it in a data cube

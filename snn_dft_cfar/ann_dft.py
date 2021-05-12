@@ -8,8 +8,13 @@ import numpy as np
 
 
 class FourierTransformArtificialNetwork():
-    def __init__(self, n_input, n_chirps, time_step=0.001, total_time=5,
-                 normalize=True):
+    def __init__(self,
+                 n_input,
+                 n_chirps,
+                 time_step=0.001,
+                 total_time=5,
+                 normalize=True
+                ):
         self.n_input = n_input
         self.n_chirps = n_chirps
         self.normalize = normalize
@@ -96,7 +101,7 @@ class FourierTransformArtificialNetwork():
         z_1 = np.hstack((z_1_real, z_1_imag))
         # ReLU functionality
         z_1 = np.where(z_1>0, z_1, 0)
-        if layers==1:
+        if layers == 1:
             return z_1
 
         ## Layer 2

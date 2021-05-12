@@ -3,6 +3,13 @@
 Implementation of a Spiking Neural Network solving the 1D and 2D Discrete Fourier
 Transform and the OS-CFAR detection algorithm for automotive radar raw data.
 
+This project shows a proof-of-concept of an SNN simulation able to replace the
+Fourier transform and object detection for radar data. The focus is not to offer
+an optimized implementation in neuromorphic hardware, so performance parameters
+like energy consumption and latency are not measured and optimized. Be also aware
+that the 2D implementation consumes a lot of memory resources and some computers
+might not be able to run it.
+
 The algorithm has been introduced in the following paper:
 
 _López-Randulfe, J., Duswald, T., Bing, Z., and Knoll, A. "Spiking Neural Network

@@ -18,11 +18,11 @@ def simulate_IF_neuron(start, end, t_step, spike_times, weights):
     time = start
     res = 0
     v_mem = 0.0
-    while (time < end + 2 * t_step):
+    while (time < end + 2*t_step):
 
         # add spikes weights of spiking inputs to v_mem
         v_mem += weights[(time <= spike_times)
-                         & (spike_times < time + t_step)].sum()
+                         & (spike_times < time+t_step)].sum()
 
         # update time
         time += t_step

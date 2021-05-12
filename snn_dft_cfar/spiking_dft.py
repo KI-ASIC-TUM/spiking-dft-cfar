@@ -17,7 +17,8 @@ class FourierTransformSpikingNetwork():
                  n_chirps,
                  time_step=0.001,
                  total_time=5,
-                 normalize=True):
+                 normalize=True
+                ):
         self.n_input = n_input
         self.n_chirps = n_chirps
         self.normalize = normalize
@@ -26,13 +27,12 @@ class FourierTransformSpikingNetwork():
         self.v_threshold = 10
         self.v_rest = 0
         self.bias = 0
-        self.v_membrane = [
-            np.zeros((self.n_input * 2, 2 * self.n_chirps)),
-            np.zeros((self.n_input * 2, 4 * self.n_chirps)),
-        ]
+        self.v_membrane = [np.zeros((self.n_input*2, 2*self.n_chirps)),
+                           np.zeros((self.n_input*2, 4*self.n_chirps)),
+                          ]
         self.v_membrane[0] -= self.v_rest
         self.v_membrane[1] -= self.v_rest
-        self.spikes = np.zeros((self.n_input, 2 * self.n_chirps))
+        self.spikes = np.zeros((self.n_input, 2*self.n_chirps))
         self.spike_trains_l1 = np.array([])
         self.spike_trains_l2 = np.array([])
 
@@ -51,7 +51,7 @@ class FourierTransformSpikingNetwork():
         Calculate 1-D FFT coefficients based on algorithm
         """
         # Constant present in all weight elements
-        c_1 = 2 * np.pi / self.n_input
+        c_1 = 2*np.pi / self.n_input
 
         # Calculate the content of the cosines/sines as a dot product
         n = np.arange(self.n_input).reshape(self.n_input, 1)
@@ -122,7 +122,8 @@ class FourierTransformSpikingNetwork():
         for row, col in np.ndindex(spikes.shape):
             spike_train = spike_trains[row, col]
             spike = np.any((spike_train >= self.sim_time)
-                           & (spike_train < (self.sim_time + self.time_step)))
+                           & (spike_train < (self.sim_time+self.time_step))
+                          )
             spikes[row, col] = int(spike)
         return spikes
 
@@ -154,7 +155,7 @@ class FourierTransformSpikingNetwork():
         # Calculate the charge of the membrane relative to the threshold
         voltage = self.v_membrane[layer] + z - self.v_threshold
         # Generate a spike when the relative voltage is positive
-        self.spikes = np.where(voltage > 0, 1, 0)
+        self.spikes = np.where(voltage>0, 1, 0)
         return self.spikes
 
     def update_membrane_potential(self, z, layer):
@@ -174,9 +175,9 @@ class FourierTransformSpikingNetwork():
         self.calculate_weights()
         sim_size = int(self.total_time / self.time_step)
         self.spike_trains_l1 = np.zeros(
-            (sim_size, 2 * self.n_input, 2 * self.n_chirps), dtype=bool)
+                (sim_size, 2*self.n_input, 2*self.n_chirps), dtype=bool)
         self.spike_trains_l2 = np.zeros(
-            (sim_size, 2 * self.n_input, 4 * self.n_chirps), dtype=bool)
+                (sim_size, 2*self.n_input, 4*self.n_chirps), dtype=bool)
         t_1, t_2, t_3, t_4, t_5 = 5 * [0]
         # Simulate the SNN until the simulation time reaches the limit
         for idx in range(sim_size):
@@ -186,7 +187,8 @@ class FourierTransformSpikingNetwork():
             input_spikes = spike_trains[:, :, idx]
             # Update input current
             z_re, z_im = self.update_input_currents(input_spikes,
-                                                    self.weights[0])
+                                                    self.weights[0]
+                                                   )
             z = np.hstack((z_re, z_im))
             t_2 += time.time()
 
@@ -207,7 +209,8 @@ class FourierTransformSpikingNetwork():
             ## Layer 2
             # Update input current
             z_re, z_im = self.update_input_currents(self.spikes,
-                                                    self.weights[1])
+                                                    self.weights[1]
+                                                   )
             z = np.vstack((z_re, z_im)).transpose()
             # Update spike generation
             self.generate_spikes(z, layer=1)

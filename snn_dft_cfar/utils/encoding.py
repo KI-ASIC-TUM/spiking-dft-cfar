@@ -34,7 +34,8 @@ class LinearFrequencyEncoder(Encoder):
                  max_value,
                  time_range,
                  time_step=0.0001,
-                 random_init=False):
+                 random_init=False
+                ):
         super().__init__()
         # Store encoder ranges
         self.min_frequency = min_frequency
@@ -69,8 +70,7 @@ class LinearFrequencyEncoder(Encoder):
         Returns the tuple (period, init_spike, n_spike)
         """
         # Calculate spiking frequency and period
-        freq = self.min_frequency + (value -
-                                     self.min_value) * self.scale_factor
+        freq = self.min_frequency + (value-self.min_value) * self.scale_factor
         period = ((1.0 / freq) / self.time_step).astype(np.int64)
         # Generate the first spike at a random position within the range of the
         # obtained period
@@ -157,5 +157,5 @@ class TimeEncoder(Encoder):
         """
         time_range = self.t_max - self.t_min
         value_range = self.x_max - self.x_min
-        result = self.t_max - time_range * (values - self.x_min) / value_range
+        result = self.t_max - time_range * (values-self.x_min) / value_range
         return result

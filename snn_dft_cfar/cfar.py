@@ -29,12 +29,10 @@ class TraditionalCFAR():
         @param zero_padding: bool indicating whether to compute CFAR at
          the borders by enlarging the frame with zeros
         """
-        #TODO: We don't use this variable. Maybe self.__name__ makes
-        # more sense here
         self.name = 'generic cfar'
         self.processing_time = 0.
 
-        # Store encoder parameteres
+        # Store encoder parameters
         self.scale_factor = scale_factor
         self.guarding_cells = guarding_cells
         self.neighbour_cells = neighbour_cells
@@ -84,11 +82,12 @@ class TraditionalCFAR():
 
         @param np_array: np.array with ndim == 1
         """
-        neighbours = np.empty(2 * self.neighbour_cells)
+        neighbours = np.empty(2*self.neighbour_cells)
         neighbours[:self.neighbour_cells] = np_array[:self.neighbour_cells]
-        neighbours[self.neighbour_cells:] = np_array[self.neighbour_cells +
-                                                     2 * self.guarding_cells +
-                                                     1:]
+        neighbours[self.neighbour_cells:] = np_array[self.neighbour_cells
+                                                     + 2*self.guarding_cells
+                                                     +1
+                                                     :]
         test_value = np_array[self.neighbour_cells + self.guarding_cells]
         return test_value, neighbours
 
@@ -100,28 +99,27 @@ class TraditionalCFAR():
 
         @param np_array: np.array with ndim == 2
         """
-        no_neighbours = np_array.size - (2 * self.guarding_cells + 1)**2
+        no_neighbours = np_array.size - (2*self.guarding_cells + 1)**2
         neighbours = np.empty(no_neighbours)
 
-        # read out neighbours
-        # TODO: This loop can probably be optimized by using np.where() function
+        # Read out neighbours
         centre = 0
         for row in range(np_array.shape[0]):
             if row < self.neighbour_cells:
                 chunk = np_array[row, :]
-                neighbours[centre:centre + chunk.size] = chunk
+                neighbours[centre : centre+chunk.size] = chunk
                 centre += chunk.size
-            elif row < self.neighbour_cells + 2 * self.guarding_cells + 1:
+            elif row < (1 + self.neighbour_cells + 2*self.guarding_cells):
                 chunk = np_array[row, :self.neighbour_cells]
-                neighbours[centre:centre + chunk.size] = chunk
+                neighbours[centre : centre+chunk.size] = chunk
                 centre += chunk.size
                 chunk = np_array[row, self.neighbour_cells +
-                                 2 * self.guarding_cells + 1:]
-                neighbours[centre:centre + chunk.size] = chunk
+                                 2*self.guarding_cells + 1 :]
+                neighbours[centre : centre+chunk.size] = chunk
                 centre += chunk.size
             else:
                 chunk = np_array[row, :]
-                neighbours[centre:centre + chunk.size] = chunk
+                neighbours[centre : centre + chunk.size] = chunk
                 centre += chunk.size
 
         if (centre != no_neighbours):
@@ -143,7 +141,7 @@ class TraditionalCFAR():
         """
         # compute sizes related to sliding window
         N = np_array.size
-        window_size = 2 * self.neighbour_cells + 2 * self.guarding_cells + 1
+        window_size = 2*self.neighbour_cells + 2*self.guarding_cells + 1
         total_windows = N - window_size + 1
 
         # initialize solution arrays
@@ -153,9 +151,8 @@ class TraditionalCFAR():
         # iterate in sliding window fashion over input array
         for i in range(total_windows):
             # determine regions of interest
-            test_value, neighbour_values = self.roi_1d(np_array[i:i +
-                                                                window_size])
-            self.cfar_1d_core(i, test_value, neighbour_values)
+            test_value, neighbours = self.roi_1d(np_array[i : i+window_size])
+            self.cfar_1d_core(i, test_value, neighbours)
 
         # return results array
         return self.results
@@ -183,26 +180,28 @@ class TraditionalCFAR():
         """
         # compute sizes related to sliding window
         N_x, N_y = np_array.shape
-        window_size = 2 * self.neighbour_cells + 2 * self.guarding_cells + 1
+        window_size = 2*self.neighbour_cells + 2*self.guarding_cells + 1
         total_windows_x = N_x - window_size + 1
         total_windows_y = N_y - window_size + 1
 
         # initialize solution arrays
-        self.results = np.zeros(total_windows_x * total_windows_y)
+        self.results = np.zeros(total_windows_x*total_windows_y)
         self.threshold = np.zeros_like(self.results)
 
         # iterate in sliding window fashion over input array
         for i, j in np.ndindex(total_windows_x, total_windows_y):
             # determine regions of interest
             test_value, neighbour_values = self.roi_2d(
-                np_array[i:i + window_size, j:j + window_size])
-            self.cfar_1d_core(total_windows_y * i + j, test_value,
-                              neighbour_values)
+                    np_array[i : i+window_size, j : j+ window_size])
+            self.cfar_1d_core(total_windows_y*i + j,
+                              test_value,
+                              neighbour_values
+                             )
 
         # reshape results
         self.results = self.results.reshape((total_windows_x, total_windows_y))
         self.threshold = self.threshold.reshape(
-            (total_windows_x, total_windows_y))
+                (total_windows_x, total_windows_y))
 
         # return results array
         return self.results
@@ -221,20 +220,20 @@ class TraditionalCFAR():
         if self.zero_padding:
             padding = self.guarding_cells + self.neighbour_cells
             if dim == 1:
-                tmp = np.zeros(np_array.size + 2 * padding)
-                tmp[padding:padding + np_array.size] = np_array
+                tmp = np.zeros(np_array.size + 2*padding)
+                tmp[padding : padding+np_array.size] = np_array
                 np_array = tmp
                 del (tmp)
             elif dim == 2:
                 r_dim, c_dim = np_array.shape
-                tmp = np.zeros((r_dim + 2 * padding, c_dim + 2 * padding))
-                tmp[padding:padding + r_dim,
-                    padding:padding + c_dim] = np_array
+                tmp = np.zeros((r_dim + 2*padding, c_dim + 2*padding))
+                tmp[padding : padding+r_dim,
+                    padding : padding+c_dim] = np_array
                 np_array = tmp
             else:
                 error = """
-                CFAR alorithm received wrong a np.array of unexpected dimension {}.
-                Expected dimension 1 or 2.
+                CFAR alorithm received wrong a np.array of unexpected
+                dimension {}.Expected dimension 1 or 2.
                 """.format(dim)
                 raise ValueError(error)
         else:
@@ -259,8 +258,12 @@ class CACFAR(TraditionalCFAR):
     """
     Cell Averaging CFAR algorithm
     """
-    def __init__(self, scale_factor, guarding_cells, neighbour_cells,
-                 zero_padding):
+    def __init__(self,
+                 scale_factor,
+                 guarding_cells,
+                 neighbour_cells,
+                 zero_padding
+                ):
         """
         Initialization
 
@@ -284,8 +287,14 @@ class OSCFAR(TraditionalCFAR):
     """
     Ordered Statistics CFAR algorithm
     """
-    def __init__(self, scale_factor, guarding_cells, neighbour_cells, k,
-                 zero_padding, **kwargs):
+    def __init__(self,
+                 scale_factor,
+                 guarding_cells,
+                 neighbour_cells,
+                 k,
+                 zero_padding,
+                 **kwargs
+                ):
         """
         Initialization
 
@@ -322,7 +331,8 @@ class OSCFAR_SNN(TraditionalCFAR):
                  t_min,
                  x_max,
                  x_min,
-                 t_step=0.01):
+                 t_step=0.01
+                ):
         """
         Initialization.
 
@@ -371,12 +381,10 @@ class OSCFAR_SNN(TraditionalCFAR):
         time_encoder = TimeEncoder(t_max=self.t_max,
                                    t_min=self.t_min,
                                    x_max=self.x_max,
-                                   x_min=self.x_min)
+                                   x_min=self.x_min
+                                  )
 
-        #TODO: Send spike times calculation to isolated function
-        # (and maybe also the weight calculation :) )
-        # input spike times
-        spike_times = np.zeros(neighbour_values.size + 1)
+        spike_times = np.zeros(neighbour_values.size+1)
         spike_times[:neighbour_values.size] = neighbour_values[:]
         spike_times[-1] = test_value * self.scale_factor
         spike_times = time_encoder(spike_times)

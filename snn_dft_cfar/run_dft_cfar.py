@@ -25,7 +25,8 @@ def dft_cfar(raw_data,
              cfar_args,
              method="snn",
              from_file=False,
-             cropped=False):
+             cropped=False
+            ):
     """
     Call the routines for executing the DFT and the OS-CFAR
     """
@@ -105,17 +106,23 @@ def plot(dft,
         fig_dft, ax1 = snn_dft_cfar.utils.plot_tools.plot_dft(dft,
                                                               dft_title,
                                                               show=False,
-                                                              cropped=cropped)
-        fig_cfar, ax2 = snn_dft_cfar.utils.plot_tools.plot_cfar(
-            cfar, cfar_title, show=False, cropped=cropped)
+                                                              cropped=cropped
+                                                             )
+        fig_cfar, ax2 = snn_dft_cfar.utils.plot_tools.plot_cfar(cfar,
+                                                                cfar_title,
+                                                                show=False,
+                                                                cropped=cropped
+                                                               )
         # Save the figures to local files
-        fig_dft.savefig("{}/dft{}D_{}.{}".format(results_path, dims, method,
-                                                 fmt),
-                        dpi=150)
-        fig_cfar.savefig("{}/cfar{}D_{}.{}".format(results_path, dims, method,
-                                                   fmt),
+        fig_dft.savefig("{}/dft{}D_{}.{}"
+                        "".format(results_path, dims, method, fmt),
+                        dpi=150
+                       )
+        fig_cfar.savefig("{}/cfar{}D_{}.{}"
+                         "".format(results_path, dims, method, fmt),
                          dpi=150,
-                         bbox_inches="tight")
+                         bbox_inches="tight"
+                        )
     else:
         fig, axes = plt.subplots(ncols=2, figsize=(12, 6))
         plt.subplots_adjust(wspace=0.05)
@@ -123,15 +130,18 @@ def plot(dft,
                                                dft_title,
                                                show=False,
                                                ax=axes[0],
-                                               cropped=cropped)
+                                               cropped=cropped
+                                              )
         snn_dft_cfar.utils.plot_tools.plot_cfar(cfar,
                                                 cfar_title,
                                                 show=False,
                                                 ax=axes[1],
-                                                cropped=cropped)
-        fig.savefig("{}/pipeline{}D_{}.{}".format(results_path, dims, method,
-                                                  fmt),
-                    dpi=50)
+                                                cropped=cropped
+                                               )
+        fig.savefig("{}/pipeline{}D_{}.{}"
+                    "".format(results_path, dims, method, fmt),
+                    dpi=50
+                   )
     if show:
         plt.show()
     return

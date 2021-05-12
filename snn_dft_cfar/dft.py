@@ -40,15 +40,16 @@ def standard_dft(raw_data, dimensions):
     """
     if dimensions == 1:
         dft_np = np.abs(np.fft.fft(raw_data))
-        result = dft_np[1:int(dft_np.size / 2)]
+        result = dft_np[1 : int(dft_np.size/2)]
     elif dimensions == 2:
         dft_np = np.abs(np.fft.fft2(raw_data))
         width, height = dft_np.shape
         # Remove negative values from the range spectrum
-        positive_range = dft_np[:, 0:int(height / 2)]
+        positive_range = dft_np[:, 0 : int(height/2)]
         # Re-adjust the plot so the velocity spectrum is centered around zero
-        centered = np.vstack((positive_range[int(width / 2):, :],
-                              positive_range[:int(width / 2), :]))
+        centered = np.vstack((positive_range[int(width/2):, :],
+                              positive_range[:int(width/2), :]
+                            ))
         # Place the speed on the horizontal axis, and range in the vertical one
         result = np.flip(np.transpose(centered), axis=0)
     return result
@@ -101,8 +102,9 @@ def ann_dft(raw_data, dimensions):
         n_chirps = 1
     elif dimensions == 2:
         raise (ValueError, "2-dim functionality not implemented")
-    ann = snn_dft_cfar.ann_dft.FourierTransformArtificialNetwork(
-        n_samples, n_chirps)
+    ann = snn_dft_cfar.ann_dft.FourierTransformArtificialNetwork(n_samples,
+                                                                 n_chirps
+                                                                )
 
     output = ann.run(raw_data, dimensions)
     real = output[:900] - output[900:1800]
@@ -111,14 +113,14 @@ def ann_dft(raw_data, dimensions):
     return modulus[1:450]
 
 
-def linear_rate_encoding(raw_data, coding_params):
+def linear_rate_encoding(raw_data, encoding_params):
     """
     Normalize and encode input data using the LinearFrequencyEncoder
     """
     # Normalize all samples between 0 and 1, based on global max and min values
     normalized_cube = raw_operations.normalize(raw_data)
     # Encode the voltage to spikes using rate encoding
-    encoder = encoding.LinearFrequencyEncoder(**coding_params,
+    encoder = encoding.LinearFrequencyEncoder(**encoding_params,
                                               random_init=True)
     encoded_cube = encoder(normalized_cube)
     return encoded_cube
@@ -138,14 +140,14 @@ def adjust_snn_dft(dft_data, dimensions):
     modulus = np.sqrt(real**2 + imag**2) + 0.1
 
     if dimensions == 1:
-        result = modulus[1:int(n_samples / 2)]
+        result = modulus[1 : int(n_samples/2)]
     else:
         # Remove negative side of the spectrum. Resulting spectrum is "upside-down",
         # so samples have to be taken backwards
-        positive_range = modulus[int(n_samples / 2):1:-1, :]
+        positive_range = modulus[int(n_samples/2) : 1 : -1, :]
         # Re-adjust the plot so the velocity spectrum is centered around zero
-        result = np.hstack((positive_range[:, int(n_chirps / 2):],
-                            positive_range[:, :int(n_chirps / 2)]))
+        result = np.hstack((positive_range[:, int(n_chirps/2):],
+                            positive_range[:, :int(n_chirps/2)]))
     return result
 
 
@@ -158,13 +160,15 @@ def get_complex_comps(spike_sum, dimensions, n_samples, n_chirps=1):
         imag_total = spike_sum[:n_samples, 1] - spike_sum[n_samples:, 1]
 
     if dimensions == 2:
-        real = spike_sum[:, :n_chirps * 2]
-        imag = spike_sum[:, n_chirps * 2:]
+        real = spike_sum[:, :n_chirps*2]
+        imag = spike_sum[:, n_chirps*2:]
 
         real_total = (
             real[:n_samples, :n_chirps] + real[n_samples:, n_chirps:] -
-            (real[n_samples:, :n_chirps] + real[:n_samples, n_chirps:]))
+            (real[n_samples:, :n_chirps] + real[:n_samples, n_chirps:])
+        )
         imag_total = (
             imag[:n_samples, :n_chirps] + imag[n_samples:, n_chirps:] -
-            (imag[n_samples:, :n_chirps] + imag[:n_samples, n_chirps:]))
+            (imag[n_samples:, :n_chirps] + imag[:n_samples, n_chirps:])
+        )
     return (real_total, imag_total)

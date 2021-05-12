@@ -30,36 +30,40 @@ def parse_args():
         usage="main.py [-h] [-d {1 2}] [-m {numpy SNN}] [-f] config_file")
     parser.add_argument("config_file",
                         type=str,
-                        help="Relative location of the configuration file")
+                        help="Relative location of the configuration file"
+                       )
     parser.add_argument("-d",
                         "--dimensions",
                         type=int,
                         choices=[1, 2],
                         default=1,
                         metavar="",
-                        help="{1 | 2} number of DFT dimensions")
-    parser.add_argument(
-        "-m",
-        "--method",
-        type=str,
-        choices=["numpy", "SNN", "ANN"],
-        default="SNN",
-        metavar="",
-        help="{numpy | SNN} method used for running the system")
+                        help="{1 | 2} number of DFT dimensions"
+                       )
+    parser.add_argument("-m",
+                        "--method",
+                        type=str,
+                        choices=["numpy", "SNN", "ANN"],
+                        default="SNN",
+                        metavar="",
+                        help="{numpy | SNN} method used for running the system"
+                       )
     parser.add_argument("-f",
                         type=str2bool,
                         default=False,
                         nargs='?',
                         const=True,
                         metavar="",
-                        help="Get the S-DFT data from a local file")
+                        help="Get the S-DFT data from a local file"
+                       )
     parser.add_argument("-s",
                         type=str2bool,
                         default=False,
                         nargs='?',
                         const=True,
                         metavar="",
-                        help="Show the plot after the simulation")
+                        help="Show the plot after the simulation"
+                       )
     # Get the values from the argument list
     args = parser.parse_args()
     config_file = args.config_file
@@ -135,14 +139,16 @@ def run(fpath, dims, dft_args, cfar_args, method, from_file, show_plot,
         raw_data = data_cube
     dft, cfar = snn_dft_cfar.run_dft_cfar.dft_cfar(raw_data, dims, dft_args,
                                                    cfar_args, method,
-                                                   from_file, cropped)
+                                                   from_file, cropped
+                                                  )
     snn_dft_cfar.run_dft_cfar.plot(dft,
                                    cfar,
                                    dims,
                                    method,
                                    show=show_plot,
                                    fmt=fmt,
-                                   cropped=cropped)
+                                   cropped=cropped
+                                  )
     return
 
 

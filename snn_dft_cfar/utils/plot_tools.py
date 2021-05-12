@@ -46,7 +46,8 @@ def get_range_limits(dims,
                      c=300,
                      f_0=77,
                      f_s=24.6,
-                     S=6.5):
+                     S=6.5
+                    ):
     """
     Return the range and velocity scales, based on radar parameters
 
@@ -62,10 +63,10 @@ def get_range_limits(dims,
     f_max = f_s / 2
     wavelength = c * 1000 / f_0
     # Calculate maximum and minimum measurable ranges
-    d_max = (f_max * c) / (2 * S)
+    d_max = (f_max*c) / (2*S)
     d_min = d_max / (nsamples)
     # Calculate maximum and minimum measurable velocities
-    v_max = wavelength / (4 * T_c)
+    v_max = wavelength / (4*T_c)
     v_min = v_max / nchirps
     if dims == 1:
         return (d_max, d_min)
@@ -85,7 +86,7 @@ def plot_1dfft(dft_data, title="Spiking DFT", show=True, cropped=False):
     format_plotting()
     plt.close()
     d_max, d_min = get_range_limits(dims=1, nsamples=dft_data.size)
-    freq_bins = np.arange(d_min, d_max + d_min, d_min)[:dft_data.size]
+    freq_bins = np.arange(d_min, d_max+d_min, d_min)[:dft_data.size]
     if cropped:
         dft_data = dft_data[:200]
         freq_bins = freq_bins[:200]
@@ -106,10 +107,12 @@ def plot_2dfft(dft_data,
                title="Spiking DFT",
                show=True,
                ax=None,
-               cropped=False):
+               cropped=False
+              ):
     d_max, d_min, v_max, v_min = get_range_limits(dims=2,
                                                   nchirps=128,
-                                                  nsamples=dft_data.shape[0])
+                                                  nsamples=dft_data.shape[0]
+                                                 )
     if cropped:
         dft_data = dft_data[-200:, :]
         d_max *= 200 / 449
@@ -117,8 +120,9 @@ def plot_2dfft(dft_data,
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6, 6))
     else:
         fig = None
-    ax.imshow(20 * np.log10(dft_data),
-              extent=[-v_max, v_max - 2 * v_min, d_min, d_max])
+    ax.imshow(20*np.log10(dft_data),
+              extent=[-v_max, v_max-2*v_min, d_min, d_max]
+             )
     format_plotting()
     ax.set_xlabel("Speed (m/s)", fontsize=20)
     ax.set_ylabel("Range (m)", fontsize=20)
@@ -156,7 +160,7 @@ def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR", cropped=False):
     """
     format_plotting()
     d_max, d_min = get_range_limits(dims=1, nsamples=449)
-    freq_bins = np.arange(d_min, d_max + d_min, d_min)
+    freq_bins = np.arange(d_min, d_max+d_min, d_min)
     if cropped:
         freq_bins = freq_bins[:200]
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14, 5))
@@ -166,16 +170,18 @@ def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR", cropped=False):
         ax.plot(cfar_object.input_array, label='FT')
     else:
         tmp_padding = cfar_object.guarding_cells + cfar_object.neighbour_cells
-        tmp_size = cfar_object.input_array.size - 2 * tmp_padding
+        tmp_size = cfar_object.input_array.size - 2*tmp_padding
         ax.plot(freq_bins,
-                cfar_object.input_array[tmp_padding:tmp_size + tmp_padding],
+                cfar_object.input_array[tmp_padding : tmp_size+tmp_padding],
                 label='FT')
 
     # plot threshold line
     if cfar_object.show_threshold:
         low = cfar_object.guarding_cells + cfar_object.neighbour_cells
-        high = cfar_object.guarding_cells+cfar_object.neighbour_cells+ \
-                cfar_object.threshold.size
+        high = (cfar_object.guarding_cells
+                + cfar_object.neighbour_cells
+                + cfar_object.threshold.size
+               )
 
     # plot detected peaks
     cntr = 0
@@ -200,21 +206,22 @@ def plot_cfar_1d(cfar_object, show=True, title="OS-CFAR", cropped=False):
                             label='detected peaks')
                 cntr += 1
             else:
-                ax.axvline(x * 0.632 + 0.63, ls='--', c='C1', lw=1)
+                ax.axvline(x*0.632+0.63, ls='--', c='C1', lw=1)
 
     # plot boundaries where algorithm works properly
     if not cfar_object.zero_padding:
-        ax.axvline(cfar_object.guarding_cells + cfar_object.neighbour_cells -
-                   1,
+        ax.axvline(cfar_object.guarding_cells+cfar_object.neighbour_cells-1,
                    ls='--',
                    c='C2',
                    lw=1,
                    label='algorithm boundaries')
-        ax.axvline(cfar_object.results.size + cfar_object.guarding_cells +
-                   cfar_object.neighbour_cells,
+        ax.axvline(cfar_object.results.size
+                   + cfar_object.guarding_cells
+                   + cfar_object.neighbour_cells,
                    ls='--',
                    c='C2',
-                   lw=1)
+                   lw=1
+                  )
     else:
         pass
 
@@ -240,14 +247,16 @@ def plot_cfar_2d(cfar_object, show=True, title="Spiking DFT", ax=None):
     """
     d_max, d_min, v_max, v_min = get_range_limits(dims=2,
                                                   nchirps=128,
-                                                  nsamples=449)
+                                                  nsamples=449
+                                                 )
 
     # Create the CFAR array
     if not cfar_object.zero_padding:
         result = np.zeros_like(cfar_object.input_array)
         temp = cfar_object.guarding_cells + cfar_object.neighbour_cells
-        result[temp:temp + cfar_object.results.shape[0],
-               temp:temp + cfar_object.results.shape[1]] = cfar_object.results
+        result[temp : temp+cfar_object.results.shape[0],
+               temp : temp+cfar_object.results.shape[1]
+              ] = cfar_object.results
     else:
         result = cfar_object.results
 
@@ -259,7 +268,7 @@ def plot_cfar_2d(cfar_object, show=True, title="Spiking DFT", ax=None):
         fig = None
         ax.set_yticks([])
     format_plotting()
-    ax.imshow(result, extent=[-v_max, v_max - 2 * v_min, d_min, d_max])
+    ax.imshow(result, extent=[-v_max, v_max-2*v_min, d_min, d_max])
     ax.set_aspect("auto")
     plt.xlabel("Speed (m/s)", fontsize=20)
     plt.title(title)

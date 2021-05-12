@@ -1,0 +1,19 @@
+# Compiled python modules.
+**.pyc
+
+# Results folder
+examples/results/
+results/
+
+# IPYNB checkpoints in example folder
+examples/.ipynb_checkpoints/
+
+# Experiment results and datasets
+log
+**.csv
+**.eps
+**.png
+
+# Keras models
+**/models/**
+
